@@ -1,62 +1,62 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle } from "lucide-react";
 import { residents } from "@/data/mockData";
+import { cn } from "@/lib/utils";
+
+const careLevelDot = {
+  Low: "bg-green-500",
+  Medium: "bg-orange-500",
+  High: "bg-red-500",
+};
+
+function formatRoom(residence: string, room: string) {
+  const wing = residence.includes("1") ? "A" : residence.includes("2") ? "B" : "C";
+  return `Room ${wing}${room}`;
+}
 
 export default function ResidentSummary() {
   const navigate = useNavigate();
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-base font-semibold">
-          Recent Residents
-        </CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <CardTitle className="text-lg font-semibold">Residents Overview</CardTitle>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate("/residents")}
-          className="text-xs text-blue-600 hover:text-blue-700"
+          className="text-sm text-blue-600 hover:text-blue-700 h-auto p-0"
         >
           View all
         </Button>
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y">
-          {residents.slice(0, 5).map((resident) => (
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {residents.slice(0, 6).map((resident) => (
             <div
               key={resident.id}
-              className="flex items-center justify-between px-6 py-3 hover:bg-muted/40 cursor-pointer transition-colors"
+              className="rounded-lg border border-slate-200 p-4 hover:bg-slate-50 cursor-pointer transition-colors"
               onClick={() => navigate(`/residents/${resident.id}`)}
             >
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-sm font-medium">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-sm font-medium shrink-0">
                   {resident.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
                 </div>
-                <div>
-                  <p className="text-sm font-medium">{resident.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Room {resident.room} · {resident.status}
-                  </p>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold leading-tight">{resident.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{formatRoom(resident.residence, resident.room)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {resident.alert && (
-                  <AlertTriangle className="h-4 w-4 text-orange-500" />
-                )}
-                {resident.task > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {resident.task} task{resident.task > 1 ? "s" : ""}
-                  </Badge>
-                )}
-                {!resident.alert && resident.task === 0 && (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                )}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{resident.age} years</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("h-2 w-2 rounded-full", careLevelDot[resident.careLevel])} />
+                  <span className="text-xs text-muted-foreground">{resident.careLevel}</span>
+                </div>
               </div>
             </div>
           ))}

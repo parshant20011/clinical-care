@@ -4,56 +4,69 @@ import { useNavigate } from "react-router-dom";
 import { tasks } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 
+const priorityConfig = {
+  Urgent: "bg-red-100 text-red-700",
+  High: "bg-slate-700 text-white",
+  Medium: "bg-slate-100 text-slate-700",
+  Low: "bg-slate-100 text-slate-600",
+};
+
 const statusConfig = {
-  pending: { label: "Pending", className: "bg-blue-100 text-blue-700" },
-  completed: { label: "Completed", className: "bg-green-100 text-green-700" },
+  in_progress: { label: "In Progress", className: "bg-green-100 text-green-700" },
+  pending: { label: "Pending", className: "bg-orange-100 text-orange-700" },
   overdue: { label: "Overdue", className: "bg-red-100 text-red-700" },
+  completed: { label: "Completed", className: "bg-blue-100 text-blue-700" },
 };
 
 export default function TaskOverview() {
   const navigate = useNavigate();
+  const activeTasks = tasks.filter((t) => t.status !== "completed").slice(0, 4);
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-base font-semibold">
-          Task Overview
-        </CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <CardTitle className="text-lg font-semibold">Active Tasks</CardTitle>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate("/tasks")}
-          className="text-xs text-blue-600 hover:text-blue-700"
+          className="text-sm text-blue-600 hover:text-blue-700 h-auto p-0"
         >
           View all
         </Button>
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y">
-          {tasks.slice(0, 5).map((task) => {
-            const config = statusConfig[task.status];
+      <CardContent>
+        <div className="space-y-3">
+          {activeTasks.map((task) => {
+            const status = statusConfig[task.status];
             return (
               <div
                 key={task.id}
-                className="flex items-start justify-between px-6 py-3 hover:bg-muted/40 transition-colors"
+                className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 p-4"
               >
-                <div>
-                  <p className="text-sm font-medium">{task.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {task.residentName} · {task.assignedTo}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Due: {task.dueDate}
-                  </p>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold leading-tight">{task.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{task.residentName}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{task.assignedTo}</p>
                 </div>
-                <span
-                  className={cn(
-                    "text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap",
-                    config.className
-                  )}
-                >
-                  {config.label}
-                </span>
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <span
+                    className={cn(
+                      "text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap",
+                      priorityConfig[task.priority]
+                    )}
+                  >
+                    {task.priority}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap",
+                      status.className
+                    )}
+                  >
+                    {status.label}
+                  </span>
+                </div>
               </div>
             );
           })}

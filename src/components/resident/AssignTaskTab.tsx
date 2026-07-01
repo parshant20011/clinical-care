@@ -15,8 +15,9 @@ const roles = [
 ];
 
 const statusColors = {
-  pending: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
+  pending: "bg-orange-100 text-orange-700",
+  in_progress: "bg-green-100 text-green-700",
+  completed: "bg-blue-100 text-blue-700",
   overdue: "bg-red-100 text-red-700",
 };
 
@@ -132,7 +133,7 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
                       statusColors[task.status]
                     )}
                   >
-                    {task.status}
+                    {task.status === "in_progress" ? "In Progress" : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                   </span>
                 </div>
               </CardContent>

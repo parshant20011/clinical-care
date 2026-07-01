@@ -3,90 +3,175 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, AlertTriangle, CheckCircle } from "lucide-react";
-import { residents } from "@/data/mockData";
+import { Search, Plus, ArrowUpDown, Filter } from "lucide-react";
+import { residents as initialResidents, type Resident } from "@/data/mockData";
+import { cn } from "@/lib/utils";
+
+type SortKey = "name" | "age" | "room" | "careLevel";
+
+const careLevelRank = { Low: 0, Medium: 1, High: 2 };
+
+const emptyForm = { name: "", room: "", age: "", gender: "Female", diagnosis: "" };
 
 export default function Residents() {
   const navigate = useNavigate();
+  const [residents, setResidents] = useState<Resident[]>(initialResidents);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "permanent" | "respite" | "on-leave">("all");
+  const [gender, setGender] = useState("all");
+  const [careLevel, setCareLevel] = useState("all");
+  const [accountStatus, setAccountStatus] = useState("all");
+  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" } | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
 
   const filtered = residents.filter((r) => {
     const matchSearch =
       r.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.room.includes(search);
-    const matchFilter =
-      filter === "all" ||
-      (filter === "permanent" && r.status === "Permanent") ||
-      (filter === "respite" && r.status === "Respite") ||
-      (filter === "on-leave" && r.onLeave);
-    return matchSearch && matchFilter;
+      r.room.includes(search) ||
+      r.diagnosis.toLowerCase().includes(search.toLowerCase());
+    const matchGender = gender === "all" || r.gender === gender;
+    const matchCareLevel = careLevel === "all" || r.careLevel === careLevel;
+    const matchStatus = accountStatus === "all" || r.accountStatus === accountStatus;
+    return matchSearch && matchGender && matchCareLevel && matchStatus;
   });
+
+  const sorted = sort
+    ? [...filtered].sort((a, b) => {
+        let cmp = 0;
+        if (sort.key === "name") cmp = a.name.localeCompare(b.name);
+        else if (sort.key === "age") cmp = a.age - b.age;
+        else if (sort.key === "room") cmp = a.room.localeCompare(b.room);
+        else if (sort.key === "careLevel") cmp = careLevelRank[a.careLevel] - careLevelRank[b.careLevel];
+        return sort.dir === "asc" ? cmp : -cmp;
+      })
+    : filtered;
+
+  function toggleSort(key: SortKey) {
+    setSort((prev) =>
+      prev?.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
+    );
+  }
+
+  function handleAddResident() {
+    if (!form.name || !form.room) return;
+    const newResident: Resident = {
+      id: `${Date.now()}`,
+      name: form.name,
+      room: form.room,
+      doa: new Date().toISOString().slice(0, 10),
+      age: Number(form.age) || 0,
+      gender: form.gender,
+      status: "Permanent",
+      respite: false,
+      onLeave: false,
+      acdp: false,
+      cpr: false,
+      bgl: false,
+      mobile: false,
+      ihi: "",
+      anAcc: "—",
+      task: 0,
+      alert: false,
+      doctor: "",
+      medicareCard: "",
+      concessionNumber: "",
+      nok: "",
+      residence: "",
+      urn: "",
+      diagnosis: form.diagnosis,
+      allergies: [],
+      careLevel: "Low",
+      accountStatus: "Active",
+    };
+    setResidents((prev) => [...prev, newResident]);
+    setForm(emptyForm);
+    setAddOpen(false);
+  }
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Residents</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {residents.length} residents total
-          </p>
-        </div>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-1" />
-          New Resident
-        </Button>
-      </div>
-
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name or room..."
+            placeholder="Search by name, room, or diagnosis..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
           />
         </div>
-        <div className="flex gap-2">
-          {(["all", "permanent", "respite", "on-leave"] as const).map((f) => (
-            <Button
-              key={f}
-              size="sm"
-              variant={filter === f ? "default" : "outline"}
-              onClick={() => setFilter(f)}
-              className="capitalize"
-            >
-              {f.replace("-", " ")}
-            </Button>
-          ))}
-        </div>
+        <Select value={gender} onValueChange={setGender}>
+          <SelectTrigger className="w-36"><SelectValue placeholder="All Genders" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Genders</SelectItem>
+            <SelectItem value="Female">Female</SelectItem>
+            <SelectItem value="Male">Male</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={careLevel} onValueChange={setCareLevel}>
+          <SelectTrigger className="w-32"><SelectValue placeholder="All Levels" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Levels</SelectItem>
+            <SelectItem value="Low">Low</SelectItem>
+            <SelectItem value="Medium">Medium</SelectItem>
+            <SelectItem value="High">High</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={accountStatus} onValueChange={setAccountStatus}>
+          <SelectTrigger className="w-32"><SelectValue placeholder="All Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="Active">Active</SelectItem>
+            <SelectItem value="Inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="outline">
+          <Filter className="h-4 w-4 mr-1" />
+          More Filters
+        </Button>
+        <Button size="sm" onClick={() => setAddOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          Add Resident
+        </Button>
       </div>
+
+      <p className="text-sm text-muted-foreground">
+        Showing {sorted.length} of {residents.length} residents
+      </p>
 
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="font-medium">Resident</TableHead>
-              <TableHead className="font-medium">Room</TableHead>
-              <TableHead className="font-medium">DOA</TableHead>
-              <TableHead className="font-medium">Respite</TableHead>
-              <TableHead className="font-medium">On Leave</TableHead>
-              <TableHead className="font-medium">ACD/P</TableHead>
-              <TableHead className="font-medium">CPR</TableHead>
-              <TableHead className="font-medium">BGL</TableHead>
-              <TableHead className="font-medium">Mobile</TableHead>
-              <TableHead className="font-medium">IHI</TableHead>
-              <TableHead className="font-medium">AN-ACC</TableHead>
-              <TableHead className="font-medium">Task</TableHead>
-              <TableHead className="font-medium">Alert</TableHead>
+              <TableHead className="font-medium cursor-pointer select-none" onClick={() => toggleSort("name")}>
+                <span className="inline-flex items-center gap-1">Resident Name <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
+              <TableHead className="font-medium cursor-pointer select-none" onClick={() => toggleSort("age")}>
+                <span className="inline-flex items-center gap-1">Age <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
+              <TableHead className="font-medium">Gender</TableHead>
+              <TableHead className="font-medium cursor-pointer select-none" onClick={() => toggleSort("room")}>
+                <span className="inline-flex items-center gap-1">Room <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
+              <TableHead className="font-medium">Primary Diagnosis</TableHead>
+              <TableHead className="font-medium cursor-pointer select-none" onClick={() => toggleSort("careLevel")}>
+                <span className="inline-flex items-center gap-1">Care Level <ArrowUpDown className="h-3 w-3" /></span>
+              </TableHead>
+              <TableHead className="font-medium">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((r) => (
+            {sorted.map((r) => (
               <TableRow
                 key={r.id}
                 className="cursor-pointer hover:bg-muted/40"
@@ -99,82 +184,90 @@ export default function Residents() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">{r.name}</p>
-                      <p className="text-xs text-muted-foreground">{r.age} yrs · {r.gender}</p>
+                      <p className="text-xs text-muted-foreground">ID: R{r.id.padStart(3, "0")}</p>
                     </div>
                   </div>
                 </TableCell>
+                <TableCell className="text-sm">{r.age} years</TableCell>
+                <TableCell className="text-sm">{r.gender}</TableCell>
                 <TableCell className="text-sm">{r.room}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{r.doa}</TableCell>
+                <TableCell className="text-sm">{r.diagnosis.split(",")[0]}</TableCell>
                 <TableCell>
-                  {r.respite ? (
-                    <Badge variant="secondary" className="text-xs">Yes</Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">No</span>
-                  )}
+                  <Badge
+                    className={cn(
+                      "text-xs",
+                      r.careLevel === "High" && "bg-red-100 text-red-700 hover:bg-red-100",
+                      r.careLevel === "Medium" && "bg-orange-100 text-orange-700 hover:bg-orange-100",
+                      r.careLevel === "Low" && "bg-green-100 text-green-700 hover:bg-green-100"
+                    )}
+                  >
+                    {r.careLevel}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  {r.onLeave ? (
-                    <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">Leave</Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {r.acdp ? (
-                    <span className="text-xs font-medium text-blue-600">ACD</span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {r.cpr ? (
-                    <Badge className="text-xs bg-green-100 text-green-700 hover:bg-green-100">FOR</Badge>
-                  ) : (
-                    <Badge className="text-xs bg-red-100 text-red-700 hover:bg-red-100">NOT</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {r.bgl ? (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {r.mobile ? (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-xs font-mono text-muted-foreground">{r.ihi.slice(-6)}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="text-xs">{r.anAcc}</Badge>
-                </TableCell>
-                <TableCell>
-                  {r.task > 0 ? (
-                    <Badge className="text-xs">{r.task}</Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {r.alert ? (
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
+                  <Badge
+                    className={cn(
+                      "text-xs",
+                      r.accountStatus === "Active"
+                        ? "bg-green-100 text-green-700 hover:bg-green-100"
+                        : "bg-muted text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    {r.accountStatus}
+                  </Badge>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        {filtered.length === 0 && (
+        {sorted.length === 0 && (
           <div className="py-12 text-center text-sm text-muted-foreground">
             No residents match your search.
           </div>
         )}
       </div>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Resident</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Full Name</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Room</Label>
+                <Input value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">Age</Label>
+                <Input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Gender</Label>
+              <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Primary Diagnosis</Label>
+              <Input value={form.diagnosis} onChange={(e) => setForm({ ...form, diagnosis: e.target.value })} className="mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddResident}>Add Resident</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

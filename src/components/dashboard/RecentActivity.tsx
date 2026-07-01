@@ -1,46 +1,45 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { progressNotes } from "@/data/mockData";
+import { FileText, Clock, AlertTriangle, UserPlus, ClipboardList } from "lucide-react";
+import { recentActivity, type ActivityItem } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 
-const categoryColors = {
-  clinical: "bg-blue-100 text-blue-700",
-  "personal care": "bg-green-100 text-green-700",
-  behaviour: "bg-orange-100 text-orange-700",
-  incident: "bg-red-100 text-red-700",
+const kindConfig: Record<ActivityItem["kind"], { icon: typeof FileText; bg: string; color: string }> = {
+  note: { icon: FileText, bg: "bg-blue-50", color: "text-blue-600" },
+  task: { icon: Clock, bg: "bg-green-50", color: "text-green-600" },
+  alert: { icon: AlertTriangle, bg: "bg-red-50", color: "text-red-600" },
+  assessment: { icon: UserPlus, bg: "bg-purple-50", color: "text-purple-600" },
+  careplan: { icon: ClipboardList, bg: "bg-blue-50", color: "text-blue-600" },
 };
 
 export default function RecentActivity() {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold">
-          Recent Progress Notes
-        </CardTitle>
+    <Card className="flex flex-col h-full">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y">
-          {progressNotes.map((note) => (
-            <div key={note.id} className="px-6 py-3">
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className={cn(
-                    "text-xs px-2 py-0.5 rounded-full font-medium capitalize",
-                    categoryColors[note.category]
-                  )}
-                >
-                  {note.category}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {note.date} {note.time}
-                </span>
+      <CardContent className="flex flex-col flex-1 pt-0">
+        <div className="space-y-5 flex-1">
+          {recentActivity.map((item) => {
+            const config = kindConfig[item.kind];
+            const Icon = config.icon;
+            return (
+              <div key={item.id} className="flex gap-3">
+                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", config.bg)}>
+                  <Icon className={cn("h-4 w-4", config.color)} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm leading-snug">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {item.author} · {item.timeAgo}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm line-clamp-2">{note.note}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                By {note.author}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        <button className="text-sm text-blue-600 hover:text-blue-700 text-center pt-4 mt-4 border-t border-slate-200">
+          View all activity
+        </button>
       </CardContent>
     </Card>
   );

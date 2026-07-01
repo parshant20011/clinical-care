@@ -26,6 +26,10 @@ export interface Resident {
   diagnosis: string;
   allergies: { type: string; description: string; severity: string }[];
   photo?: string;
+  // Facility-wide list/dashboard fields — distinct from `status` (which is
+  // Permanent/Respite residency type, used on the profile page).
+  careLevel: "Low" | "Medium" | "High";
+  accountStatus: "Active" | "Inactive";
 }
 
 export interface ProgressNote {
@@ -45,9 +49,11 @@ export interface Task {
   title: string;
   assignedTo: string;
   area: string;
-  status: "pending" | "completed" | "overdue";
+  status: "pending" | "in_progress" | "completed" | "overdue";
   dueDate: string;
   notes?: string;
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  createdBy: string;
 }
 
 export interface ChecklistItem {
@@ -143,6 +149,8 @@ export const residents: Resident[] = [
     allergies: [
       { type: "medication", description: "Penicillin", severity: "High" },
     ],
+    careLevel: "High",
+    accountStatus: "Active",
   },
   {
     id: "2",
@@ -171,6 +179,8 @@ export const residents: Resident[] = [
     urn: "URN002",
     diagnosis: "COPD, Osteoarthritis",
     allergies: [],
+    careLevel: "Low",
+    accountStatus: "Active",
   },
   {
     id: "3",
@@ -201,6 +211,8 @@ export const residents: Resident[] = [
     allergies: [
       { type: "food", description: "Shellfish", severity: "Medium" },
     ],
+    careLevel: "Medium",
+    accountStatus: "Inactive",
   },
   {
     id: "4",
@@ -232,6 +244,8 @@ export const residents: Resident[] = [
       { type: "medication", description: "Sulfa drugs", severity: "High" },
       { type: "other", description: "Latex", severity: "Low" },
     ],
+    careLevel: "High",
+    accountStatus: "Active",
   },
   {
     id: "5",
@@ -260,6 +274,8 @@ export const residents: Resident[] = [
     urn: "URN005",
     diagnosis: "Alzheimer's Disease, Hip Fracture (healed)",
     allergies: [],
+    careLevel: "Medium",
+    accountStatus: "Active",
   },
 ];
 
@@ -298,42 +314,50 @@ export const tasks: Task[] = [
     id: "t1",
     residentId: "1",
     residentName: "Margaret Thompson",
-    title: "Physiotherapy assessment for right knee",
-    assignedTo: "Physiotherapist",
+    title: "Blood Glucose Monitoring",
+    assignedTo: "Sarah Johnson",
     area: "House 1",
-    status: "pending",
+    status: "in_progress",
     dueDate: "2026-06-25",
-    notes: "Resident complains of knee pain during transfers",
+    notes: "Daily BGL monitoring for diabetic resident",
+    priority: "High",
+    createdBy: "Jane Smith RN",
   },
   {
     id: "t2",
-    residentId: "1",
-    residentName: "Margaret Thompson",
-    title: "GP review - medication reconciliation",
-    assignedTo: "GP",
-    area: "House 1",
+    residentId: "2",
+    residentName: "Robert Jenkins",
+    title: "Head Injury Assessment (Incident Follow-up)",
+    assignedTo: "Dr. Patel",
+    area: "House 2",
     status: "pending",
     dueDate: "2026-06-26",
+    priority: "Urgent",
+    createdBy: "Care Manager",
   },
   {
     id: "t3",
-    residentId: "4",
-    residentName: "Harold Brown",
-    title: "Podiatry review",
-    assignedTo: "Podiatrist",
-    area: "House 1",
-    status: "overdue",
-    dueDate: "2026-06-20",
+    residentId: "3",
+    residentName: "Dorothy Williams",
+    title: "Pain Assessment - Pending",
+    assignedTo: "Sarah Johnson",
+    area: "House 3",
+    status: "pending",
+    dueDate: "2026-06-27",
+    priority: "High",
+    createdBy: "Jane Smith RN",
   },
   {
     id: "t4",
     residentId: "4",
     residentName: "Harold Brown",
-    title: "Diabetic care review",
-    assignedTo: "Registered Nurse",
+    title: "Fall Risk Assessment (3 monthly)",
+    assignedTo: "Care Manager",
     area: "House 1",
-    status: "pending",
-    dueDate: "2026-06-27",
+    status: "in_progress",
+    dueDate: "2026-06-28",
+    priority: "Medium",
+    createdBy: "Care Manager",
   },
   {
     id: "t5",
@@ -344,16 +368,20 @@ export const tasks: Task[] = [
     area: "House 1",
     status: "completed",
     dueDate: "2026-06-24",
+    priority: "Medium",
+    createdBy: "Jane Smith RN",
   },
   {
     id: "t6",
-    residentId: "3",
-    residentName: "Dorothy Williams",
-    title: "Falls risk reassessment",
+    residentId: "5",
+    residentName: "Ethel Davis",
+    title: "Weight Check",
     assignedTo: "Registered Nurse",
-    area: "House 3",
+    area: "House 2",
     status: "pending",
     dueDate: "2026-06-28",
+    priority: "Low",
+    createdBy: "Care Manager",
   },
 ];
 
@@ -568,4 +596,86 @@ export const documentCategories = [
   "Pharmacy",
   "Resident Documents",
   "Vaccination records",
+];
+
+export interface FacilityDocument {
+  id: string;
+  name: string;
+  category: string;
+  type: "PDF" | "Word" | "Excel" | "Image";
+  size: string;
+  uploadDate: string;
+  uploadedBy: string;
+}
+
+export const facilityDocuments: FacilityDocument[] = [
+  { id: "d1", name: "Admission Documentation", category: "Admission", type: "PDF", size: "2.4 MB", uploadDate: "2023-05-15", uploadedBy: "Admin" },
+  { id: "d2", name: "Advanced Care Directive", category: "Legal", type: "PDF", size: "1.1 MB", uploadDate: "2023-05-20", uploadedBy: "Admin" },
+  { id: "d3", name: "Medication Chart", category: "Clinical", type: "PDF", size: "890 KB", uploadDate: "2024-01-01", uploadedBy: "Jane Smith RN" },
+  { id: "d4", name: "Clinical Policy Manual", category: "Policy", type: "PDF", size: "5.2 MB", uploadDate: "2024-01-05", uploadedBy: "Care Manager" },
+  { id: "d5", name: "Staff Training Guide", category: "Training", type: "Word", size: "3.8 MB", uploadDate: "2024-01-10", uploadedBy: "Care Manager" },
+  { id: "d6", name: "Emergency Procedures", category: "Policy", type: "PDF", size: "1.5 MB", uploadDate: "2024-01-02", uploadedBy: "Admin" },
+];
+
+export interface StaffUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  shift: "Morning" | "Afternoon" | "Night";
+}
+
+export const staffUsers: StaffUser[] = [
+  { id: "u1", name: "Jane Smith", email: "j.smith@care.com", role: "Registered Nurse", shift: "Morning" },
+  { id: "u2", name: "Michael Roberts", email: "m.roberts@care.com", role: "Enrolled Nurse", shift: "Morning" },
+  { id: "u3", name: "Emily Chen", email: "e.chen@care.com", role: "Carer", shift: "Morning" },
+  { id: "u4", name: "David Lee", email: "d.lee@care.com", role: "Carer", shift: "Afternoon" },
+  { id: "u5", name: "Amanda Wilson", email: "a.wilson@care.com", role: "Registered Nurse", shift: "Afternoon" },
+  { id: "u6", name: "James Taylor", email: "j.taylor@care.com", role: "Care Manager", shift: "Morning" },
+  { id: "u7", name: "Lisa Brown", email: "l.brown@care.com", role: "Admin", shift: "Morning" },
+];
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  timeAgo: string;
+}
+
+export const appNotifications: AppNotification[] = [
+  { id: "n1", title: "New task assigned: Medication Review", timeAgo: "5 min ago" },
+  { id: "n2", title: "Assessment due for Margaret Thompson", timeAgo: "1 hour ago" },
+  { id: "n3", title: "Wound dressing change required - Room 108", timeAgo: "2 hours ago" },
+];
+
+export interface ActivityItem {
+  id: string;
+  kind: "note" | "task" | "alert" | "assessment" | "careplan";
+  title: string;
+  author: string;
+  timeAgo: string;
+}
+
+export const recentActivity: ActivityItem[] = [
+  { id: "act1", kind: "note", title: "Progress note added for Margaret Thompson", author: "Sarah Johnson", timeAgo: "5 minutes ago" },
+  { id: "act2", kind: "task", title: "Task completed: Weight Check - Ethel Davis", author: "Emily Chen", timeAgo: "15 minutes ago" },
+  { id: "act3", kind: "alert", title: "Urgent: Medication review due for Robert Jenkins", author: "System", timeAgo: "30 minutes ago" },
+  { id: "act4", kind: "assessment", title: "New assessment scheduled for Dorothy Williams", author: "Michael Roberts", timeAgo: "1 hour ago" },
+  { id: "act5", kind: "careplan", title: "Care plan updated for Harold Brown", author: "Sarah Johnson", timeAgo: "2 hours ago" },
+];
+
+export interface WeeklyActivityPoint {
+  day: string;
+  notes: number;
+  tasks: number;
+  wounds: number;
+}
+
+export const weeklyActivity: WeeklyActivityPoint[] = [
+  { day: "Mon", notes: 2, tasks: 1, wounds: 0 },
+  { day: "Tue", notes: 0, tasks: 1, wounds: 0 },
+  { day: "Wed", notes: 1, tasks: 2, wounds: 0 },
+  { day: "Thu", notes: 0, tasks: 0, wounds: 0 },
+  { day: "Fri", notes: 1, tasks: 1, wounds: 1 },
+  { day: "Sat", notes: 0, tasks: 0, wounds: 0 },
+  { day: "Sun", notes: 0, tasks: 1, wounds: 0 },
 ];

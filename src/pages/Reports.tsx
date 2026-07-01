@@ -1,5 +1,22 @@
+import { useState } from "react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, Legend,
+} from "recharts";
+import { residents, tasks, wounds, weeklyActivity } from "@/data/mockData";
+import StatsCard from "@/components/dashboard/StatsCard";
+import { toast } from "@/hooks/use-toast";
+import { Users, ClipboardList, BedDouble, FileSearch } from "lucide-react";
+
+const careLevelColors = { Low: "#22c55e", Medium: "#f97316", High: "#ef4444" };
+const statusColors = { pending: "#f97316", in_progress: "#22c55e", completed: "#22c55e", overdue: "#ef4444" };
 
 const reportSections = [
   {
@@ -40,26 +57,134 @@ const reportSections = [
 ];
 
 export default function Reports() {
+  const [range, setRange] = useState("this-week");
+  const [reportType, setReportType] = useState("all");
+
+  const careLevelData = (["Low", "Medium", "High"] as const).map((level) => ({
+    name: level,
+    value: residents.filter((r) => r.careLevel === level).length,
+  }));
+
+  const statusData = (["pending", "in_progress", "completed", "overdue"] as const).map((status) => ({
+    name: status.charAt(0).toUpperCase() + status.slice(1),
+    count: tasks.filter((t) => t.status === status).length,
+    fill: statusColors[status],
+  }));
+
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Management Reports</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Clinical and operational reporting
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <Select value={range} onValueChange={setRange}>
+            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="this-week">This Week</SelectItem>
+              <SelectItem value="this-month">This Month</SelectItem>
+              <SelectItem value="this-quarter">This Quarter</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={reportType} onValueChange={setReportType}>
+            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reports</SelectItem>
+              <SelectItem value="clinical">Clinical</SelectItem>
+              <SelectItem value="governance">Governance</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => toast({ title: "Export started", description: "Generating PDF export…" })}
+          >
+            <Download className="h-4 w-4 mr-1" /> Export PDF
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => toast({ title: "Export started", description: "Generating Excel export…" })}
+          >
+            <Download className="h-4 w-4 mr-1" /> Export Excel
+          </Button>
+        </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatsCard title="Active Residents" value={residents.length} icon={Users} iconColor="text-blue-600" />
+        <StatsCard title="Pending Tasks" value={tasks.filter((t) => t.status === "pending").length} icon={ClipboardList} iconColor="text-orange-600" />
+        <StatsCard title="Active Wounds" value={wounds.filter((w) => w.status === "active").length} icon={BedDouble} iconColor="text-red-600" />
+        <StatsCard title="Pending Assessments" value={tasks.filter((t) => t.status === "pending").length} icon={FileSearch} iconColor="text-blue-600" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold mb-2">Care Level Distribution</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={careLevelData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={80} paddingAngle={2}>
+                  {careLevelData.map((entry) => (
+                    <Cell key={entry.name} fill={careLevelColors[entry.name]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold mb-2">Task Status Overview</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={statusData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {statusData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-sm font-semibold mb-2">Weekly Activity Summary</p>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={weeklyActivity}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="notes" name="Progress Notes" stroke="#3b82f6" />
+              <Line type="monotone" dataKey="tasks" name="Tasks" stroke="#ef4444" />
+              <Line type="monotone" dataKey="wounds" name="Wound Updates" stroke="#22c55e" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
       <div className="space-y-6">
+        <h2 className="text-lg font-semibold">Quick Reports</h2>
         {reportSections.map((section) => (
           <div key={section.category}>
-            <h2 className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-3">
+            <h3 className="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-3">
               {section.category}
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {section.reports.map((report) => (
                 <Card
                   key={report.id}
                   className="cursor-pointer hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
+                  onClick={() => toast({ title: report.name, description: "Report preview coming soon." })}
                 >
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="h-8 w-8 rounded bg-blue-100 flex items-center justify-center shrink-0">

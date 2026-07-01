@@ -23,10 +23,10 @@ An aged care clinical management web app built for **Amber Aged Care** (replacin
 
 ## Layout rules
 
-- Sidebar: fixed left, `w-64`, dark background (`bg-sidebar` CSS var)
-- Header: fixed top-right, `h-16`
-- Main content offset: `ml-64 mt-16 p-6`
-- Do not change these offsets — everything is calibrated to them
+- Sidebar: fixed left, `w-64`, dark navy background (`bg-sidebar` CSS var, `hsl(210 35% 18%)` ≈ `#1e2e3e`)
+- Header: fixed top-right (`left-64`), `h-20`; renders the current page's title + subtitle on the left (derived from the route in `Header.tsx`) and search/notifications/account on the right. Pages must NOT render their own `<h1>` title block — the header owns it.
+- Main content offset: `ml-64 mt-20 px-8 py-6`
+- Header height and the `mt-20` content offset are calibrated together — change both if you change one
 
 ---
 

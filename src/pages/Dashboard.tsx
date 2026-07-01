@@ -1,63 +1,38 @@
-import { Users, ClipboardList, AlertTriangle, CheckCircle } from "lucide-react";
+import { Users, ClipboardList, FileSearch, BedDouble, HeartPulse, AlertTriangle } from "lucide-react";
 import StatsCard from "@/components/dashboard/StatsCard";
 import ResidentSummary from "@/components/dashboard/ResidentSummary";
 import TaskOverview from "@/components/dashboard/TaskOverview";
 import RecentActivity from "@/components/dashboard/RecentActivity";
-import { residents, tasks } from "@/data/mockData";
+import { residents, tasks, wounds } from "@/data/mockData";
 
 export default function Dashboard() {
   const totalResidents = residents.length;
-  const onLeave = residents.filter((r) => r.onLeave).length;
-  const pendingTasks = tasks.filter((t) => t.status === "pending").length;
-  const overdueTasks = tasks.filter((t) => t.status === "overdue").length;
-  const alertResidents = residents.filter((r) => r.alert).length;
+  const activeTasks = tasks.filter((t) => t.status !== "completed").length;
+  const pendingAssessments = tasks.filter((t) => t.status === "pending").length;
+  const activeWounds = wounds.filter((w) => w.status === "active").length;
+  const highCare = residents.filter((r) => r.careLevel === "High").length;
+  const urgentTasks = tasks.filter((t) => t.priority === "Urgent").length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Clinical Overview — {new Date().toLocaleDateString("en-AU", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-        </p>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        <StatsCard title="Total Residents" value={totalResidents} icon={Users} iconColor="text-blue-600" tint="blue" />
+        <StatsCard title="Active Tasks" value={activeTasks} icon={ClipboardList} iconColor="text-blue-600" />
+        <StatsCard title="Pending Assessments" value={pendingAssessments} icon={FileSearch} iconColor="text-blue-600" />
+        <StatsCard title="Active Wounds" value={activeWounds} icon={BedDouble} iconColor="text-red-600" tint="red" />
+        <StatsCard title="High Care" value={highCare} icon={HeartPulse} iconColor="text-orange-600" />
+        <StatsCard title="Urgent Tasks" value={urgentTasks} icon={AlertTriangle} iconColor="text-red-600" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatsCard
-          title="Total Residents"
-          value={totalResidents}
-          subtitle={`${onLeave} on leave`}
-          icon={Users}
-          iconColor="text-blue-600"
-        />
-        <StatsCard
-          title="Pending Tasks"
-          value={pendingTasks}
-          subtitle={`${overdueTasks} overdue`}
-          icon={ClipboardList}
-          iconColor="text-orange-600"
-        />
-        <StatsCard
-          title="Alerts"
-          value={alertResidents}
-          subtitle="Residents with alerts"
-          icon={AlertTriangle}
-          iconColor="text-red-600"
-        />
-        <StatsCard
-          title="Completed Today"
-          value={tasks.filter((t) => t.status === "completed").length}
-          subtitle="Tasks completed"
-          icon={CheckCircle}
-          iconColor="text-green-600"
-        />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <ResidentSummary />
+          <TaskOverview />
+        </div>
+        <div className="lg:col-span-1 flex">
+          <RecentActivity />
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ResidentSummary />
-        <TaskOverview />
-      </div>
-
-      <RecentActivity />
     </div>
   );
 }

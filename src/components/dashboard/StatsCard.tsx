@@ -5,55 +5,46 @@ import { cn } from "@/lib/utils";
 interface StatsCardProps {
   title: string;
   value: string | number;
-  subtitle?: string;
   icon: LucideIcon;
   iconColor?: string;
-  trend?: { value: number; label: string };
+  tint?: "blue" | "red";
 }
+
+const iconBg: Record<string, string> = {
+  "text-blue-600": "bg-blue-50",
+  "text-green-600": "bg-green-50",
+  "text-orange-600": "bg-orange-50",
+  "text-red-600": "bg-red-50",
+  "text-purple-600": "bg-purple-50",
+};
 
 export default function StatsCard({
   title,
   value,
-  subtitle,
   icon: Icon,
   iconColor = "text-blue-600",
-  trend,
+  tint,
 }: StatsCardProps) {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-1">{value}</p>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-            )}
-            {trend && (
-              <p
-                className={cn(
-                  "text-xs mt-1 font-medium",
-                  trend.value >= 0 ? "text-green-600" : "text-red-600"
-                )}
-              >
-                {trend.value >= 0 ? "+" : ""}
-                {trend.value} {trend.label}
-              </p>
-            )}
-          </div>
+    <Card
+      className={cn(
+        tint === "blue" && "bg-blue-50/50 border-blue-100",
+        tint === "red" && "bg-red-50/60 border-red-100"
+      )}
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-medium text-muted-foreground leading-snug">{title}</p>
           <div
             className={cn(
-              "h-12 w-12 rounded-full flex items-center justify-center bg-opacity-10",
-              iconColor === "text-blue-600" && "bg-blue-50",
-              iconColor === "text-green-600" && "bg-green-50",
-              iconColor === "text-orange-600" && "bg-orange-50",
-              iconColor === "text-red-600" && "bg-red-50",
-              iconColor === "text-purple-600" && "bg-purple-50"
+              "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+              iconBg[iconColor] ?? "bg-blue-50"
             )}
           >
-            <Icon className={cn("h-6 w-6", iconColor)} />
+            <Icon className={cn("h-5 w-5", iconColor)} />
           </div>
         </div>
+        <p className="text-3xl font-bold mt-4">{value}</p>
       </CardContent>
     </Card>
   );
