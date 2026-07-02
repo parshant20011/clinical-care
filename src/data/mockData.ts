@@ -698,7 +698,7 @@ export interface StaffUser {
 }
 
 export const staffUsers: StaffUser[] = [
-  { id: "u1", name: "Jane Smith", email: "j.smith@care.com", role: "Registered Nurse", shift: "Morning" },
+  { id: "u1", name: "Sarah Johnson", email: "s.johnson@care.com", role: "Registered Nurse", shift: "Morning" },
   { id: "u2", name: "Michael Roberts", email: "m.roberts@care.com", role: "Enrolled Nurse", shift: "Morning" },
   { id: "u3", name: "Emily Chen", email: "e.chen@care.com", role: "Carer", shift: "Morning" },
   { id: "u4", name: "David Lee", email: "d.lee@care.com", role: "Carer", shift: "Afternoon" },
