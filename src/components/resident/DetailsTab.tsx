@@ -1,122 +1,110 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { User, Heart, AlertTriangle, Calendar, CreditCard, Pencil } from "lucide-react";
 import type { Resident } from "@/data/mockData";
+import { toast } from "@/hooks/use-toast";
 
 interface DetailsTabProps {
   resident: Resident;
 }
 
-export default function DetailsTab({ resident }: DetailsTabProps) {
+function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[
-            { label: "Full Name", value: resident.name },
-            { label: "Preferred Name", value: resident.preferredName || "—" },
-            { label: "Date of Birth", value: resident.doa },
-            { label: "Age", value: `${resident.age} years` },
-            { label: "Gender", value: resident.gender },
-            { label: "URN", value: resident.urn },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{label}</span>
-              <span className="font-medium">{value}</span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Input value={value} readOnly className="mt-1 bg-muted/40" />
+    </div>
+  );
+}
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Admission Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[
-            { label: "Room", value: resident.room },
-            { label: "Admission Date", value: resident.doa },
-            { label: "Status", value: resident.status },
-            { label: "Residence", value: resident.residence },
-            { label: "Medicare Card", value: resident.medicareCard },
-            { label: "Concession No.", value: resident.concessionNumber },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{label}</span>
-              <span className="font-medium">{value}</span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+export default function DetailsTab({ resident }: DetailsTabProps) {
+  const [firstName, ...rest] = resident.name.split(" ");
+  const lastName = rest.join(" ");
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Medical</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="text-sm">
-            <span className="text-muted-foreground">Primary Diagnosis</span>
-            <p className="mt-1 font-medium">{resident.diagnosis}</p>
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">Personal Details</h3>
+        <Button onClick={() => toast({ title: "Edit Details", description: "Editing coming soon." })}>
+          <Pencil className="h-4 w-4 mr-1" />
+          Edit Details
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center gap-2 pb-3 border-b mb-3">
+            <User className="h-4 w-4 text-blue-600" />
+            <p className="text-sm font-semibold">Personal Information</p>
           </div>
-          <Separator />
-          <div>
-            <p className="text-sm text-muted-foreground mb-2">Allergies</p>
-            {resident.allergies.length === 0 ? (
-              <p className="text-sm italic text-muted-foreground">
-                Resident has nil known allergies.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {resident.allergies.map((allergy, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <span>
-                      <span className="capitalize">{allergy.type}</span>: {allergy.description}
-                    </span>
-                    <Badge
-                      variant={
-                        allergy.severity === "High"
-                          ? "destructive"
-                          : allergy.severity === "Medium"
-                          ? "default"
-                          : "secondary"
-                      }
-                      className="text-xs"
-                    >
-                      {allergy.severity}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="First Name" value={firstName} />
+            <Field label="Last Name" value={lastName || "—"} />
+            <Field label="Age" value={`${resident.age} years`} />
+            <Field label="Gender" value={resident.gender} />
+            <Field label="Nationality" value={resident.nationality ?? "—"} />
+            <Field label="Room Number" value={resident.room} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Care Flags</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {[
-            { label: "CPR Status", value: resident.cpr ? "FOR CPR" : "NOT FOR CPR", active: resident.cpr },
-            { label: "BGL Monitoring", value: resident.bgl ? "Yes" : "No", active: resident.bgl },
-            { label: "Mobile", value: resident.mobile ? "Yes" : "No", active: resident.mobile },
-            { label: "IHI", value: resident.ihi },
-            { label: "AN-ACC", value: resident.anAcc },
-            { label: "On Leave", value: resident.onLeave ? "Yes" : "No", active: resident.onLeave },
-          ].map(({ label, value, active }) => (
-            <div key={label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{label}</span>
-              <span className={`font-medium ${active === false ? "text-muted-foreground" : ""}`}>
-                {value}
-              </span>
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center gap-2 pb-3 border-b mb-3">
+            <Heart className="h-4 w-4 text-red-500" />
+            <p className="text-sm font-semibold">Medical Information</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <Field label="Primary Diagnosis" value={resident.diagnosis} />
             </div>
-          ))}
-        </CardContent>
-      </Card>
+            <Field label="Doctor" value={resident.doctor} />
+            <Field label="Weight" value="62.5 kg" />
+            <Field label="Care Level" value={resident.careLevel} />
+          </div>
+        </div>
+
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center gap-2 pb-3 border-b mb-3">
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
+            <p className="text-sm font-semibold">Allergies</p>
+          </div>
+          {resident.allergies.length === 0 ? (
+            <p className="text-sm text-muted-foreground italic">Resident has nil known allergies.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {resident.allergies.map((a, i) => (
+                <Badge key={i} variant="outline" className="bg-red-50 text-red-600 border-transparent">
+                  {a.description}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center gap-2 pb-3 border-b mb-3">
+            <Calendar className="h-4 w-4 text-blue-600" />
+            <p className="text-sm font-semibold">Admission Details</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Date of Admission" value={resident.doa} />
+            <Field label="Status" value={resident.accountStatus} />
+          </div>
+        </div>
+
+        <div className="border rounded-lg p-4 md:col-span-2">
+          <div className="flex items-center gap-2 pb-3 border-b mb-3">
+            <CreditCard className="h-4 w-4 text-blue-600" />
+            <p className="text-sm font-semibold">Identification Numbers</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Field label="Medicare Number" value={resident.medicareCard} />
+            <Field label="IHI Number" value={resident.ihi} />
+            <Field label="Resident ID" value={`R${resident.id.padStart(3, "0")}`} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

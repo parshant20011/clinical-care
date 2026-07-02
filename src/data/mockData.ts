@@ -30,6 +30,7 @@ export interface Resident {
   // Permanent/Respite residency type, used on the profile page).
   careLevel: "Low" | "Medium" | "High";
   accountStatus: "Active" | "Inactive";
+  nationality?: string;
 }
 
 export interface ProgressNote {
@@ -105,7 +106,7 @@ export interface Wound {
   nextDressing: string;
   lastReview: string;
   nextReview: string;
-  status: "active" | "healed" | "archived";
+  status: "active" | "healing" | "healed" | "archived";
   lastPhoto?: string;
 }
 
@@ -145,12 +146,14 @@ export const residents: Resident[] = [
     nok: "John Thompson",
     residence: "House 1",
     urn: "URN001",
-    diagnosis: "Dementia, Type 2 Diabetes, Hypertension",
+    diagnosis: "Dementia - Alzheimer's Type",
     allergies: [
       { type: "medication", description: "Penicillin", severity: "High" },
+      { type: "medication", description: "Aspirin", severity: "Medium" },
     ],
     careLevel: "High",
     accountStatus: "Active",
+    nationality: "Australian",
   },
   {
     id: "2",
@@ -401,6 +404,32 @@ export const checklists: Checklist[] = [
       { id: "cli6", name: "Incident report completed", completed: false },
     ],
   },
+  {
+    id: "cl2",
+    residentId: "1",
+    type: "Post Fall Incidents Checklist",
+    date: "2024-01-10",
+    completedBy: "Sarah Johnson",
+    items: [
+      { id: "cli7", name: "Assess for injuries", completed: true, completedBy: "Sarah Johnson", completedAt: "2024-01-10 10:15" },
+      { id: "cli8", name: "Vital signs recorded", completed: true, completedBy: "Sarah Johnson", completedAt: "2024-01-10 10:20" },
+      { id: "cli9", name: "Doctor notified", completed: true, completedBy: "Sarah Johnson", completedAt: "2024-01-10 10:25" },
+    ],
+  },
+  {
+    id: "cl3",
+    residentId: "1",
+    type: "New Admission Checklist",
+    date: "2023-05-15",
+    completedBy: "Michael Roberts",
+    items: [
+      { id: "cli10", name: "Initial assessment completed", completed: true, completedBy: "Michael Roberts", completedAt: "2023-05-15" },
+      { id: "cli11", name: "Medication reconciliation done", completed: true, completedBy: "Michael Roberts", completedAt: "2023-05-15" },
+      { id: "cli12", name: "Care plan initiated", completed: true, completedBy: "Michael Roberts", completedAt: "2023-05-15" },
+      { id: "cli13", name: "Room orientation completed", completed: true, completedBy: "Michael Roberts", completedAt: "2023-05-15" },
+      { id: "cli14", name: "Emergency contacts verified", completed: true, completedBy: "Michael Roberts", completedAt: "2023-05-15" },
+    ],
+  },
 ];
 
 export const carePlans: CarePlan[] = [
@@ -419,7 +448,7 @@ export const carePlans: CarePlan[] = [
   {
     id: "cp2",
     residentId: "1",
-    type: "Medication",
+    type: "Medication Management",
     observations: "Resident takes 12 medications daily. Has Type 2 Diabetes requiring insulin. Swallowing assessed as adequate for tablets.",
     goals: "Medications administered safely and on time. Blood glucose levels maintained within acceptable range (4-10 mmol/L).",
     interventions: "Medications administered by RN/EN. BGL monitored before breakfast and dinner. Insulin administered per sliding scale. Medication chart reviewed monthly by GP.",
@@ -440,6 +469,18 @@ export const carePlans: CarePlan[] = [
     createdAt: "2026-05-15",
     status: "active",
   },
+  {
+    id: "cp4",
+    residentId: "1",
+    type: "Nutrition Management",
+    observations: "Resident has Type 2 Diabetes requiring carbohydrate-controlled diet. Good appetite, no swallowing concerns.",
+    goals: "Blood glucose maintained within target range through diet. Weight remains stable.",
+    interventions: "Diabetic-friendly meal plan. Portion control monitored. Dietitian review quarterly. Snacks limited to low-GI options.",
+    reviewDate: "2026-08-10",
+    createdBy: "Sarah Jones EN",
+    createdAt: "2026-06-01",
+    status: "active",
+  },
 ];
 
 export const wounds: Wound[] = [
@@ -456,6 +497,19 @@ export const wounds: Wound[] = [
     nextReview: "2026-07-01",
     status: "active",
     lastPhoto: "2025-12-20",
+  },
+  {
+    id: "w2",
+    residentId: "1",
+    startedDate: "2024-01-05",
+    onAdmission: false,
+    woundType: "Pressure injury - Stage 2",
+    location: "Left heel",
+    dressingProduct: "Foam dressing",
+    nextDressing: "2024-01-21",
+    lastReview: "2024-01-14",
+    nextReview: "2024-01-21",
+    status: "healing",
   },
 ];
 
@@ -477,6 +531,24 @@ export const movements: Movement[] = [
     type: "Return from hospital leave",
     note: "Resident returned from hospital. Review completed. Follow-up appointment in 4 weeks.",
     recordedBy: "Sarah Jones EN",
+  },
+  {
+    id: "m3",
+    residentId: "1",
+    date: "2024-01-15",
+    time: "09:00",
+    type: "Transfer",
+    note: "Transferred to hospital for CT scan. Expected return same day.",
+    recordedBy: "Sarah Johnson",
+  },
+  {
+    id: "m4",
+    residentId: "1",
+    date: "2024-01-15",
+    time: "15:30",
+    type: "Return",
+    note: "Returned from hospital. CT results pending. No acute findings.",
+    recordedBy: "Michael Roberts",
   },
 ];
 
@@ -678,4 +750,244 @@ export const weeklyActivity: WeeklyActivityPoint[] = [
   { day: "Fri", notes: 1, tasks: 1, wounds: 1 },
   { day: "Sat", notes: 0, tasks: 0, wounds: 0 },
   { day: "Sun", notes: 0, tasks: 1, wounds: 0 },
+];
+
+// ---------------------------------------------------------------------------
+// Resident profile detail data (Doctors, Contacts, Cards, Charts, Pathways,
+// Assessments, AN-ACC, Care Plan categories, structured Forms) — used by the
+// 16 resident-profile tabs in src/components/resident/.
+// ---------------------------------------------------------------------------
+
+export interface ResidentDoctor {
+  id: string;
+  residentId: string;
+  name: string;
+  specialty: string;
+  facility: string;
+  phone: string;
+  email: string;
+  primary: boolean;
+}
+
+export const residentDoctors: ResidentDoctor[] = [
+  { id: "doc1", residentId: "1", name: "Dr. Sarah Mitchell", specialty: "General Practice", facility: "Sunrise Medical Centre", phone: "02 9123 4567", email: "s.mitchell@medical.com.au", primary: true },
+  { id: "doc2", residentId: "1", name: "Dr. Michael Chen", specialty: "Geriatrics", facility: "Elder Care Specialists", phone: "02 9123 8899", email: "m.chen@eldercare.com.au", primary: false },
+  { id: "doc3", residentId: "1", name: "Dr. Emma Wilson", specialty: "General Practice", facility: "Community Health Clinic", phone: "02 9123 2211", email: "e.wilson@chc.com.au", primary: false },
+  { id: "doc4", residentId: "1", name: "Dr. James Patterson", specialty: "Cardiology", facility: "Heart Health Centre", phone: "02 9123 5544", email: "j.patterson@hhc.com.au", primary: false },
+  { id: "doc5", residentId: "1", name: "Dr. Lisa Wong", specialty: "Psychiatry", facility: "Mind & Wellness Clinic", phone: "02 9123 7733", email: "l.wong@mindwellness.com.au", primary: false },
+];
+
+export interface ResidentContact {
+  id: string;
+  residentId: string;
+  name: string;
+  relationship: string;
+  phone: string;
+  email: string;
+  primary: boolean;
+}
+
+export const residentContacts: ResidentContact[] = [
+  { id: "con1", residentId: "1", name: "John Thompson", relationship: "Son", phone: "0412 345 678", email: "john.t@email.com", primary: true },
+  { id: "con2", residentId: "1", name: "Mary Thompson", relationship: "Daughter-in-law", phone: "0412 345 679", email: "mary.t@email.com", primary: false },
+];
+
+export interface ResidentCardRecord {
+  id: string;
+  residentId: string;
+  type: "Medicare Card" | "IHI Card" | "Concession Card" | "DVA Card";
+  number: string;
+  status: "Active" | "Verified" | "Pending" | "N/A";
+  detail?: string;
+}
+
+export const residentCards: ResidentCardRecord[] = [
+  { id: "card1", residentId: "1", type: "Medicare Card", number: "2345 67890 1", status: "Active", detail: "Expires: 12/2026" },
+  { id: "card2", residentId: "1", type: "IHI Card", number: "8003 6080 0012 3456", status: "Verified" },
+  { id: "card3", residentId: "1", type: "Concession Card", number: "Not Provided", status: "Pending" },
+  { id: "card4", residentId: "1", type: "DVA Card", number: "Not Applicable", status: "N/A" },
+];
+
+export interface VitalReading {
+  id: string;
+  residentId: string;
+  date: string;
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+  temperature: number;
+  spo2: number;
+}
+
+export const vitalReadings: VitalReading[] = [
+  { id: "vr1", residentId: "1", date: "Jan 10", systolic: 128, diastolic: 78, pulse: 72, temperature: 36.6, spo2: 97 },
+  { id: "vr2", residentId: "1", date: "Jan 11", systolic: 130, diastolic: 80, pulse: 74, temperature: 36.7, spo2: 97 },
+  { id: "vr3", residentId: "1", date: "Jan 12", systolic: 124, diastolic: 76, pulse: 71, temperature: 36.5, spo2: 98 },
+  { id: "vr4", residentId: "1", date: "Jan 13", systolic: 132, diastolic: 81, pulse: 75, temperature: 36.8, spo2: 96 },
+  { id: "vr5", residentId: "1", date: "Jan 14", systolic: 127, diastolic: 78, pulse: 73, temperature: 36.6, spo2: 97 },
+  { id: "vr6", residentId: "1", date: "Jan 15", systolic: 124, diastolic: 82, pulse: 72, temperature: 36.6, spo2: 97 },
+];
+
+export interface WeightPoint {
+  id: string;
+  residentId: string;
+  week: string;
+  value: number;
+}
+
+export const weightReadings: WeightPoint[] = [
+  { id: "wp1", residentId: "1", week: "Week 1", value: 62.5 },
+  { id: "wp2", residentId: "1", week: "Week 2", value: 62.0 },
+  { id: "wp3", residentId: "1", week: "Week 3", value: 62.8 },
+];
+
+export interface ChartBglPoint {
+  id: string;
+  residentId: string;
+  date: string;
+  value: number;
+}
+
+export const chartBglReadings: ChartBglPoint[] = [
+  { id: "cb1", residentId: "1", date: "Jan 10", value: 6.8 },
+  { id: "cb2", residentId: "1", date: "Jan 11", value: 7.2 },
+  { id: "cb3", residentId: "1", date: "Jan 12", value: 6.5 },
+  { id: "cb4", residentId: "1", date: "Jan 13", value: 7.5 },
+  { id: "cb5", residentId: "1", date: "Jan 14", value: 6.9 },
+];
+
+export interface BehaviorPoint {
+  id: string;
+  residentId: string;
+  date: string;
+  incidents: number;
+}
+
+export const behaviorReadings: BehaviorPoint[] = [
+  { id: "bh1", residentId: "1", date: "Jan 10", incidents: 0 },
+  { id: "bh2", residentId: "1", date: "Jan 11", incidents: 1 },
+  { id: "bh3", residentId: "1", date: "Jan 12", incidents: 0 },
+  { id: "bh4", residentId: "1", date: "Jan 13", incidents: 2 },
+  { id: "bh5", residentId: "1", date: "Jan 14", incidents: 0 },
+];
+
+export interface CarePathway {
+  id: string;
+  residentId: string;
+  name: string;
+  totalSteps: number;
+  completedSteps: number;
+  status: "Not Started" | "In Progress" | "Completed";
+}
+
+export const carePathways: CarePathway[] = [
+  { id: "path1", residentId: "1", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
+  { id: "path2", residentId: "1", name: "End of Life Care Pathway", totalSteps: 12, completedSteps: 0, status: "Not Started" },
+  { id: "path3", residentId: "1", name: "Hospital Discharge Pathway", totalSteps: 6, completedSteps: 4, status: "In Progress" },
+  { id: "path4", residentId: "1", name: "Palliative Care Pathway", totalSteps: 10, completedSteps: 0, status: "Not Started" },
+  { id: "path5", residentId: "1", name: "Respite Care Pathway", totalSteps: 5, completedSteps: 0, status: "Not Started" },
+];
+
+export interface AssessmentRecord {
+  id: string;
+  residentId: string;
+  name: string;
+  date: string;
+  by: string;
+  score: number;
+  summary: string;
+  status: "Completed" | "Scheduled";
+}
+
+export const assessmentRecords: AssessmentRecord[] = [
+  { id: "asmt1", residentId: "1", name: "Cognitive Assessment", date: "10/01/2024", by: "Dr. Sarah Mitchell", score: 18, summary: "MMSE score indicates moderate cognitive impairment. Continue current care plan.", status: "Completed" },
+  { id: "asmt2", residentId: "1", name: "Fall Risk Assessment", date: "12/01/2024", by: "Sarah Johnson", score: 15, summary: "High fall risk. Ensure mobility aids are within reach at all times.", status: "Completed" },
+];
+
+export const assessmentTypeOptions = [
+  "Cognitive Assessment",
+  "Fall Risk Assessment",
+  "Nutrition Assessment",
+  "Skin Integrity Assessment",
+  "Pain Assessment",
+  "Behaviour Assessment",
+];
+
+export interface AnaccDetail {
+  residentId: string;
+  fundingClass: string;
+  fundingLevel: "Low" | "Medium" | "High";
+  dailyRate: string;
+  assessmentDate: string;
+  nextReview: string;
+  domainScores: { label: string; score: number; outOf: number }[];
+  ihiNumber: string;
+  ihiVerified: boolean;
+}
+
+export const anaccDetails: AnaccDetail[] = [
+  {
+    residentId: "1",
+    fundingClass: "Class 10",
+    fundingLevel: "High",
+    dailyRate: "$285.50",
+    assessmentDate: "05/01/2024",
+    nextReview: "05/04/2024",
+    domainScores: [
+      { label: "Cognition & Behaviour", score: 4, outOf: 5 },
+      { label: "Mobility", score: 3, outOf: 5 },
+      { label: "Personal Care", score: 4, outOf: 5 },
+      { label: "Healthcare", score: 4, outOf: 5 },
+    ],
+    ihiNumber: "8003 6080 0012 3456",
+    ihiVerified: true,
+  },
+];
+
+export interface CarePlanCategory {
+  slug: string;
+  label: string;
+}
+
+export const carePlanCategories: CarePlanCategory[] = [
+  { slug: "fall-risk", label: "Fall Risk" },
+  { slug: "medication", label: "Medication" },
+  { slug: "pain-management", label: "Pain Management" },
+  { slug: "skin-care", label: "Skin Care" },
+  { slug: "nutrition", label: "Nutrition" },
+  { slug: "wellbeing", label: "Wellbeing" },
+  { slug: "physiotherapy", label: "Physiotherapy" },
+];
+
+export interface ClinicalForm {
+  id: string;
+  name: string;
+  category: string;
+  updatedDate: string;
+}
+
+export const clinicalForms: ClinicalForm[] = [
+  { id: "cf1", name: "ACFI - Medication Review", category: "Assessment", updatedDate: "15/01/2024" },
+  { id: "cf2", name: "Return from Hospital Summary", category: "Transfer", updatedDate: "14/01/2024" },
+  { id: "cf3", name: "AN-ACC Functional Assessment", category: "AN-ACC", updatedDate: "13/01/2024" },
+  { id: "cf4", name: "Behaviour Resource Utilisation Assessment", category: "Behavioral", updatedDate: "12/01/2024" },
+  { id: "cf5", name: "DEMMI Mobility Assessment", category: "Mobility", updatedDate: "11/01/2024" },
+  { id: "cf6", name: "Pain Assessment Tool", category: "Clinical", updatedDate: "10/01/2024" },
+  { id: "cf7", name: "Nutrition Screening Tool", category: "Nutrition", updatedDate: "09/01/2024" },
+  { id: "cf8", name: "Wound Assessment Form", category: "Clinical", updatedDate: "08/01/2024" },
+];
+
+export interface ResidentDocumentRecord {
+  id: string;
+  residentId: string;
+  name: string;
+  category: string;
+  size: string;
+  uploadDate: string;
+}
+
+export const residentDocuments: ResidentDocumentRecord[] = [
+  { id: "rd1", residentId: "1", name: "Admission Documentation", category: "Admission", size: "2.4 MB", uploadDate: "15/05/2023" },
+  { id: "rd2", residentId: "1", name: "Advanced Care Directive", category: "Legal", size: "1.1 MB", uploadDate: "20/05/2023" },
+  { id: "rd3", residentId: "1", name: "Medication Chart", category: "Clinical", size: "890 KB", uploadDate: "01/01/2024" },
 ];

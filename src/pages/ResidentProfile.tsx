@@ -2,8 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { residents } from "@/data/mockData";
+import { ArrowLeft, AlertTriangle, User, Calendar, Weight } from "lucide-react";
+import { residents, residentDoctors, residentContacts, weightReadings, anaccDetails } from "@/data/mockData";
 import ProgressNotesTab from "@/components/resident/ProgressNotesTab";
 import ChecklistTab from "@/components/resident/ChecklistTab";
 import AssignTaskTab from "@/components/resident/AssignTaskTab";
@@ -21,6 +21,12 @@ import CardsTab from "@/components/resident/CardsTab";
 import DoctorsTab from "@/components/resident/DoctorsTab";
 import ContactsTab from "@/components/resident/ContactsTab";
 
+const careLevelStyles: Record<string, string> = {
+  High: "bg-red-50 text-red-600 border-red-200",
+  Medium: "bg-orange-50 text-orange-600 border-orange-200",
+  Low: "bg-green-50 text-green-600 border-green-200",
+};
+
 export default function ResidentProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,172 +43,177 @@ export default function ResidentProfile() {
     );
   }
 
+  const primaryDoctor = residentDoctors.find((d) => d.residentId === resident.id && d.primary);
+  const primaryContact = residentContacts.find((c) => c.residentId === resident.id && c.primary);
+  const latestWeight = weightReadings.filter((w) => w.residentId === resident.id).at(-1);
+  const anacc = anaccDetails.find((a) => a.residentId === resident.id);
+
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/residents")}>
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Clinical
-        </Button>
-      </div>
+      <button
+        onClick={() => navigate("/residents")}
+        className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-blue-600 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Residents
+      </button>
 
       {/* Resident Header */}
-      <div className="border rounded-lg p-4 bg-card">
-        <div className="flex items-start gap-4">
-          <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-semibold shrink-0">
-            {resident.name.split(" ").map((n) => n[0]).join("")}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between flex-wrap gap-2">
-              <div>
+      <div className="border rounded-xl bg-card overflow-hidden">
+        <div className="flex items-start justify-between gap-6 p-6 flex-wrap">
+          <div className="flex items-start gap-4 min-w-0">
+            <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl font-bold shrink-0">
+              {resident.name.split(" ").map((n) => n[0]).join("")}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl font-bold">{resident.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {resident.age} years · Room {resident.room}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Last weight: 82.6 kg
-                </p>
-                <div className="flex gap-2 mt-1">
-                  <Badge className="text-xs">{resident.anAcc}</Badge>
-                  <Badge variant="outline" className="text-xs">ACD</Badge>
-                  <Badge variant="outline" className="text-xs">View</Badge>
-                  <span className="text-xs text-muted-foreground self-center">
-                    Consented: N/A
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Status: {resident.status}
-                </p>
+                <Badge variant="outline" className={careLevelStyles[resident.careLevel]}>
+                  {resident.careLevel} Care
+                </Badge>
+                <Badge className="bg-blue-600 hover:bg-blue-600 text-white">
+                  {resident.accountStatus}
+                </Badge>
               </div>
-              <div className="text-right text-sm space-y-1">
-                <p><span className="text-muted-foreground">Room: </span>{resident.room}</p>
-                <p><span className="text-muted-foreground">IHI: </span><span className="font-mono text-xs">{resident.ihi}</span></p>
-                <p><span className="text-muted-foreground">URN: </span>{resident.urn}</p>
-                <p><span className="text-muted-foreground">Medicare: </span>{resident.medicareCard}</p>
-                <p><span className="text-muted-foreground">Doctor: </span>{resident.doctor}</p>
-                <p><span className="text-muted-foreground">NOK: </span>{resident.nok}</p>
-                <p><span className="text-muted-foreground">Concession: </span>{resident.concessionNumber}</p>
-                <p><span className="text-muted-foreground">DOA: </span>{resident.doa}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{resident.diagnosis}</p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2 flex-wrap">
+                <span className="flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5" />
+                  {resident.age} years, {resident.gender}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  Admitted {resident.doa}
+                </span>
+                {latestWeight && (
+                  <span className="flex items-center gap-1.5">
+                    <Weight className="h-3.5 w-3.5" />
+                    {latestWeight.value} kg
+                  </span>
+                )}
               </div>
             </div>
-            {resident.diagnosis && (
-              <div className="mt-3 pt-3 border-t">
-                <span className="text-xs text-muted-foreground">Diagnosis: </span>
-                <span className="text-sm">{resident.diagnosis}</span>
-              </div>
-            )}
           </div>
-          <div className="text-right space-y-1 shrink-0">
-            <div className="flex flex-col gap-1 text-xs">
-              <div className="flex items-center justify-end gap-1">
-                <span className="text-muted-foreground">Allergy</span>
-                <span className="text-muted-foreground">AOR</span>
-                <span className="text-muted-foreground">From</span>
-              </div>
-              {resident.allergies.length === 0 ? (
-                <span className="text-muted-foreground">Resident has nil known allergies.</span>
-              ) : (
-                resident.allergies.map((a, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span>{a.type}</span>
-                    <span>{a.description}</span>
-                    <Badge
-                      variant={a.severity === "High" ? "destructive" : "secondary"}
-                      className="text-xs"
-                    >
-                      {a.severity}
-                    </Badge>
-                  </div>
-                ))
-              )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
+            <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
+              <p className="text-xs text-muted-foreground">Doctor</p>
+              <p className="text-sm font-semibold mt-0.5">{primaryDoctor?.name ?? resident.doctor}</p>
+            </div>
+            <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
+              <p className="text-xs text-muted-foreground">Medicare</p>
+              <p className="text-sm font-semibold mt-0.5">{resident.medicareCard}</p>
+            </div>
+            <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
+              <p className="text-xs text-muted-foreground">IHI Status</p>
+              <p className="text-sm font-semibold mt-0.5">{anacc?.ihiVerified ? "Verified" : "Not Verified"}</p>
+            </div>
+            <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
+              <p className="text-xs text-muted-foreground">Emergency Contact</p>
+              <p className="text-sm font-semibold mt-0.5 flex items-center gap-1">
+                {primaryContact?.phone ?? "—"}
+              </p>
             </div>
           </div>
         </div>
 
-        {resident.alert && (
-          <div className="mt-3 pt-3 border-t flex items-center gap-2 text-sm text-orange-600">
-            <AlertTriangle className="h-4 w-4" />
-            This resident has active alerts. Please review before providing care.
+        {resident.allergies.length > 0 && (
+          <div className="mx-6 mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-red-600">Allergies</p>
+              <p className="text-sm text-red-600/90">
+                {resident.allergies.map((a) => a.description).join(", ")}
+              </p>
+            </div>
           </div>
         )}
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="progress-notes" className="space-y-4">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 rounded-lg overflow-x-auto">
-          {[
-            { value: "progress-notes", label: "Progress Notes" },
-            { value: "checklists", label: "Checklists" },
-            { value: "tasks", label: "Tasks" },
-            { value: "forms", label: "Forms" },
-            { value: "assessments", label: "Assessments" },
-            { value: "pathways", label: "Pathways" },
-            { value: "charts", label: "Charts" },
-            { value: "care-plan", label: "Care Plan" },
-            { value: "an-acc", label: "AN-ACC" },
-            { value: "active-wounds", label: "Active Wounds" },
-            { value: "movements", label: "Movements" },
-            { value: "document", label: "Document" },
-            { value: "details", label: "Details" },
-            { value: "cards", label: "Cards" },
-            { value: "doctors", label: "Doctors" },
-            { value: "contacts", label: "Contacts" },
-          ].map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="text-xs whitespace-nowrap">
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="border rounded-xl bg-card overflow-hidden">
+        <Tabs defaultValue="progress-notes">
+          <TabsList className="flex w-full h-auto justify-start overflow-x-auto rounded-none border-b bg-transparent p-0 px-2">
+            {[
+              { value: "progress-notes", label: "Progress Notes" },
+              { value: "checklists", label: "Checklist" },
+              { value: "tasks", label: "Assign Task" },
+              { value: "forms", label: "Forms" },
+              { value: "assessments", label: "Assessment" },
+              { value: "pathways", label: "Pathways" },
+              { value: "charts", label: "Charts" },
+              { value: "care-plan", label: "Care Plan" },
+              { value: "an-acc", label: "AN-ACC" },
+              { value: "active-wounds", label: "Active Wound" },
+              { value: "movements", label: "Movement" },
+              { value: "document", label: "Documents" },
+              { value: "details", label: "Details" },
+              { value: "cards", label: "Cards" },
+              { value: "doctors", label: "Doctors" },
+              { value: "contacts", label: "Contacts" },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 data-[state=active]:shadow-none"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <TabsContent value="progress-notes">
-          <ProgressNotesTab residentId={resident.id} />
-        </TabsContent>
-        <TabsContent value="checklists">
-          <ChecklistTab residentId={resident.id} />
-        </TabsContent>
-        <TabsContent value="tasks">
-          <AssignTaskTab residentId={resident.id} />
-        </TabsContent>
-        <TabsContent value="forms">
-          <FormsTab />
-        </TabsContent>
-        <TabsContent value="assessments">
-          <AssessmentTab />
-        </TabsContent>
-        <TabsContent value="pathways">
-          <PathwaysTab />
-        </TabsContent>
-        <TabsContent value="charts">
-          <ChartsTab />
-        </TabsContent>
-        <TabsContent value="care-plan">
-          <CarePlanTab residentId={resident.id} />
-        </TabsContent>
-        <TabsContent value="an-acc">
-          <ANACCTab resident={resident} />
-        </TabsContent>
-        <TabsContent value="active-wounds">
-          <WoundsTab residentId={resident.id} />
-        </TabsContent>
-        <TabsContent value="movements">
-          <MovementTab residentId={resident.id} />
-        </TabsContent>
-        <TabsContent value="document">
-          <DocumentsTab />
-        </TabsContent>
-        <TabsContent value="details">
-          <DetailsTab resident={resident} />
-        </TabsContent>
-        <TabsContent value="cards">
-          <CardsTab resident={resident} />
-        </TabsContent>
-        <TabsContent value="doctors">
-          <DoctorsTab resident={resident} />
-        </TabsContent>
-        <TabsContent value="contacts">
-          <ContactsTab resident={resident} />
-        </TabsContent>
-      </Tabs>
+          <div className="p-6">
+            <TabsContent value="progress-notes" className="mt-0">
+              <ProgressNotesTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="checklists" className="mt-0">
+              <ChecklistTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="tasks" className="mt-0">
+              <AssignTaskTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="forms" className="mt-0">
+              <FormsTab />
+            </TabsContent>
+            <TabsContent value="assessments" className="mt-0">
+              <AssessmentTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="pathways" className="mt-0">
+              <PathwaysTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="charts" className="mt-0">
+              <ChartsTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="care-plan" className="mt-0">
+              <CarePlanTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="an-acc" className="mt-0">
+              <ANACCTab resident={resident} />
+            </TabsContent>
+            <TabsContent value="active-wounds" className="mt-0">
+              <WoundsTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="movements" className="mt-0">
+              <MovementTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="document" className="mt-0">
+              <DocumentsTab residentId={resident.id} />
+            </TabsContent>
+            <TabsContent value="details" className="mt-0">
+              <DetailsTab resident={resident} />
+            </TabsContent>
+            <TabsContent value="cards" className="mt-0">
+              <CardsTab resident={resident} />
+            </TabsContent>
+            <TabsContent value="doctors" className="mt-0">
+              <DoctorsTab resident={resident} />
+            </TabsContent>
+            <TabsContent value="contacts" className="mt-0">
+              <ContactsTab resident={resident} />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -1,56 +1,65 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Phone, Mail, Star } from "lucide-react";
-import type { Resident } from "@/data/mockData";
+import { residentContacts, type Resident } from "@/data/mockData";
+import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface ContactsTabProps {
   resident: Resident;
 }
 
 export default function ContactsTab({ resident }: ContactsTabProps) {
-  const contacts = [
-    { name: resident.nok, relationship: "Next of Kin / Power of Attorney", phone: "(04) 0000 0001", email: "nok@email.com", primary: true },
-    { name: "James Thompson", relationship: "Son", phone: "(04) 0000 0002", email: "james@email.com", primary: false },
-    { name: "Community Pharmacy", relationship: "Pharmacy", phone: "(08) 8200 2222", email: "pharmacy@local.com.au", primary: false },
-  ];
+  const contacts = residentContacts.filter((c) => c.residentId === resident.id);
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button size="sm">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">Contacts</h3>
+        <Button onClick={() => toast({ title: "Add Contact", description: "Contact form coming soon." })}>
           <Plus className="h-4 w-4 mr-1" />
           Add Contact
         </Button>
       </div>
-      <div className="space-y-3">
-        {contacts.map((contact, i) => (
-          <Card key={i}>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{contact.name}</p>
-                    {contact.primary && (
-                      <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{contact.relationship}</p>
-                  <div className="flex flex-wrap items-center gap-4 mt-2">
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Phone className="h-3 w-3" />
-                      {contact.phone}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Mail className="h-3 w-3" />
-                      {contact.email}
-                    </span>
-                  </div>
-                </div>
-                <Button size="sm" variant="outline" className="text-xs">Edit</Button>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {contacts.map((contact) => (
+          <div
+            key={contact.id}
+            className={cn("border rounded-lg p-4", contact.primary && "ring-1 ring-blue-500")}
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium shrink-0">
+                {contact.name.split(" ").map((n) => n[0]).join("")}
               </div>
-            </CardContent>
-          </Card>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{contact.name}</p>
+                  {contact.primary && (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-transparent text-xs">
+                      <Star className="h-3 w-3 mr-1 fill-blue-600" />
+                      Primary
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{contact.relationship}</p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Phone className="h-3 w-3" />
+                    {contact.phone}
+                  </p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Mail className="h-3 w-3" />
+                    {contact.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
+        {contacts.length === 0 && (
+          <p className="col-span-2 text-sm text-muted-foreground text-center py-8">No contacts found.</p>
+        )}
       </div>
     </div>
   );

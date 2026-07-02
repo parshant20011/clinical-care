@@ -1,8 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Camera } from "lucide-react";
+import { Plus, BedDouble, Calendar, Clock } from "lucide-react";
 import { wounds } from "@/data/mockData";
+import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+
+const statusStyles: Record<string, string> = {
+  active: "bg-red-50 text-red-600 border-transparent",
+  healing: "bg-green-50 text-green-600 border-transparent",
+  healed: "bg-blue-50 text-blue-600 border-transparent",
+  archived: "bg-muted text-muted-foreground border-transparent",
+};
+
+const statusLabels: Record<string, string> = {
+  active: "Active",
+  healing: "Healing",
+  healed: "Healed",
+  archived: "Archived",
+};
 
 interface WoundsTabProps {
   residentId: string;
@@ -14,16 +29,10 @@ export default function WoundsTab({ residentId }: WoundsTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline">All Wounds</Button>
-          <Button size="sm" variant="ghost">Wound Summary</Button>
-          <Button size="sm" variant="ghost">Healed</Button>
-          <Button size="sm" variant="ghost">Archived</Button>
-          <Button size="sm" variant="ghost">Monthly Report</Button>
-        </div>
-        <Button size="sm">
+        <h3 className="text-lg font-bold">Active Wounds</h3>
+        <Button onClick={() => toast({ title: "New wound record started" })}>
           <Plus className="h-4 w-4 mr-1" />
-          New Wound
+          Record New Wound
         </Button>
       </div>
 
@@ -34,58 +43,32 @@ export default function WoundsTab({ residentId }: WoundsTabProps) {
       ) : (
         <div className="space-y-3">
           {residentWounds.map((wound) => (
-            <Card key={wound.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium">{wound.woundType}</CardTitle>
-                  <Badge
-                    variant={wound.status === "active" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {wound.status}
-                  </Badge>
+            <div key={wound.id} className="border rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <BedDouble className="h-4 w-4 text-muted-foreground" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Location</p>
-                    <p className="font-medium">{wound.location}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold">{wound.location}</p>
+                    <Badge variant="outline" className={cn(statusStyles[wound.status])}>
+                      {statusLabels[wound.status]}
+                    </Badge>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Started</p>
-                    <p>{wound.startedDate}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">On Admission</p>
-                    <p>{wound.onAdmission ? "Yes" : "No"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Dressing Product</p>
-                    <p>{wound.dressingProduct}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Next Dressing</p>
-                    <p>{wound.nextDressing}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Next Review</p>
-                    <p>{wound.nextReview}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{wound.woundType}</p>
+                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Discovered: {wound.startedDate}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Last assessed: {wound.lastReview}
+                    </span>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <Button size="sm" variant="outline">
-                    <Camera className="h-4 w-4 mr-1" />
-                    Upload Photo
-                  </Button>
-                  {wound.lastPhoto && (
-                    <p className="text-xs text-muted-foreground">
-                      Last photo: {wound.lastPhoto}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

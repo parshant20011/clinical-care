@@ -3,16 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { tasks } from "@/data/mockData";
+import { residents, tasks, staffUsers } from "@/data/mockData";
 import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { Send, CalendarDays } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
-const roles = [
-  "Registered Nurse", "Enrolled Nurse", "Care Manager", "Physiotherapist",
-  "Occupational Therapist", "Podiatrist", "Dietitian", "GP", "Social Worker",
-];
+const priorities = ["Low", "Medium", "High", "Urgent"] as const;
 
 const statusColors = {
   pending: "bg-orange-100 text-orange-700",
@@ -26,92 +24,108 @@ interface AssignTaskTabProps {
 }
 
 export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
-  const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState("");
-  const [role, setRole] = useState("");
+  const [selectedResident, setSelectedResident] = useState(residentId);
+  const [staffMember, setStaffMember] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<typeof priorities[number]>("Medium");
   const [dueDate, setDueDate] = useState("");
-  const [notes, setNotes] = useState("");
 
   const residentTasks = tasks.filter((t) => t.residentId === residentId);
 
+  const handleSubmit = () => {
+    if (!selectedResident || !staffMember || !description.trim()) return;
+    toast({ title: "Task Created", description: "The task has been assigned successfully." });
+    setStaffMember("");
+    setDescription("");
+    setPriority("Medium");
+    setDueDate("");
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-sm font-medium text-muted-foreground">
-          {residentTasks.length} task{residentTasks.length !== 1 ? "s" : ""}
-        </h3>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-4 w-4 mr-1" />
+    <div className="space-y-6">
+      <h3 className="text-lg font-bold">Assign Task</h3>
+
+      <div className="space-y-4 max-w-2xl">
+        <div>
+          <Label className="text-sm font-medium">Resident</Label>
+          <Select value={selectedResident} onValueChange={setSelectedResident}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue placeholder="Select resident" />
+            </SelectTrigger>
+            <SelectContent>
+              {residents.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name} - Room {r.room}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">Assign to Staff</Label>
+          <Select value={staffMember} onValueChange={setStaffMember}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue placeholder="Select staff member" />
+            </SelectTrigger>
+            <SelectContent>
+              {staffUsers.map((s) => (
+                <SelectItem key={s.id} value={s.name}>
+                  {s.name} — {s.role}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">Task Description</Label>
+          <Textarea
+            placeholder="Describe the task..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="mt-1.5"
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">Priority</Label>
+          <Select value={priority} onValueChange={(v) => setPriority(v as typeof priorities[number])}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {priorities.map((p) => (
+                <SelectItem key={p} value={p}>{p}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">Due Date</Label>
+          <div className="relative mt-1.5">
+            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        <Button className="w-full" size="lg" onClick={handleSubmit}>
+          <Send className="h-4 w-4 mr-2" />
           Assign Task
         </Button>
       </div>
 
-      {showForm && (
-        <Card className="border-blue-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">New Task</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <Label className="text-xs">Task Description</Label>
-              <Input
-                placeholder="Describe the task..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs">Assign to Role</Label>
-                <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Choose a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((r) => (
-                      <SelectItem key={r} value={r}>{r}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs">Due Date</Label>
-                <Input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs">Notes (optional)</Label>
-              <Textarea
-                placeholder="Additional notes..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                className="mt-1"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm">Assign Task</Button>
-              <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-3">
-        {residentTasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No tasks assigned yet.
-          </p>
-        ) : (
-          residentTasks.map((task) => (
+      {residentTasks.length > 0 && (
+        <div className="space-y-3 pt-2">
+          <p className="text-sm font-semibold">Assigned Tasks</p>
+          {residentTasks.map((task) => (
             <Card key={task.id}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
@@ -123,24 +137,21 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
                     <p className="text-xs text-muted-foreground">
                       Due: {task.dueDate}
                     </p>
-                    {task.notes && (
-                      <p className="text-xs text-muted-foreground mt-1">{task.notes}</p>
-                    )}
                   </div>
                   <span
                     className={cn(
                       "text-xs px-2 py-0.5 rounded-full font-medium capitalize whitespace-nowrap",
-                      statusColors[task.status]
+                      statusColors[task.status as keyof typeof statusColors]
                     )}
                   >
-                    {task.status === "in_progress" ? "In Progress" : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    {task.status}
                   </span>
                 </div>
               </CardContent>
             </Card>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
