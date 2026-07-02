@@ -20,12 +20,12 @@ export default function DocumentDetailDialog({ doc, open, onOpenChange, onDelete
         <DialogHeader>
           <DialogTitle>{doc.name}</DialogTitle>
         </DialogHeader>
-        <div className="border border-dashed rounded-lg p-8 flex flex-col items-center gap-3">
+        <div className="border border-dashed rounded-lg p-4 sm:p-8 flex flex-col items-center gap-3">
           <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
             <FileText className="h-6 w-6 text-red-600" />
           </div>
-          <p className="text-sm text-muted-foreground">Document preview would be displayed here</p>
-          <div className="flex gap-2">
+          <p className="text-sm text-muted-foreground text-center">Document preview would be displayed here</p>
+          <div className="flex flex-wrap justify-center gap-2 w-full">
             <Button
               variant="outline"
               size="sm"
@@ -45,7 +45,7 @@ export default function DocumentDetailDialog({ doc, open, onOpenChange, onDelete
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs text-muted-foreground">Uploaded by</p>
             <p className="text-sm font-medium">{doc.uploadedBy}</p>

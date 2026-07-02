@@ -23,9 +23,9 @@ export default function PathwaysTab({ residentId }: PathwaysTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Care Pathways</h3>
-        <Button onClick={() => toast({ title: "Start Pathway", description: "Pathway selection coming soon." })}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Care Pathways</h3>
+        <Button onClick={() => toast({ title: "Start Pathway", description: "Pathway selection coming soon." })} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           Start Pathway
         </Button>

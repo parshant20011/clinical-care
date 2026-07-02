@@ -34,9 +34,9 @@ export default function ProgressNotesTab({ residentId }: ProgressNotesTabProps) 
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Progress Notes</h3>
-        <Button onClick={() => setShowForm(!showForm)}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Progress Notes</h3>
+        <Button onClick={() => setShowForm(!showForm)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           Add Note
         </Button>
@@ -45,7 +45,7 @@ export default function ProgressNotesTab({ residentId }: ProgressNotesTabProps) 
       {showForm && (
         <div className="border rounded-lg p-4 space-y-3">
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
@@ -61,7 +61,7 @@ export default function ProgressNotesTab({ residentId }: ProgressNotesTabProps) 
             onChange={(e) => setNote(e.target.value)}
             rows={4}
           />
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button size="sm" onClick={handleSubmit}>Save Note</Button>
             <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
               Cancel
@@ -78,8 +78,8 @@ export default function ProgressNotesTab({ residentId }: ProgressNotesTabProps) 
         ) : (
           notes.map((n) => (
             <div key={n.id} className="border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <Badge variant="outline" className={cn("capitalize", categoryColors[n.category])}>
                     {n.category}
                   </Badge>

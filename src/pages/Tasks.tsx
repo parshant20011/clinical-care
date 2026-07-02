@@ -75,7 +75,7 @@ export default function Tasks() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-48">
+        <div className="relative w-full sm:flex-1 sm:min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search tasks, residents, or staff..."
@@ -85,7 +85,7 @@ export default function Tasks() {
           />
         </div>
         <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All Status" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-36"><SelectValue placeholder="All Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -95,7 +95,7 @@ export default function Tasks() {
           </SelectContent>
         </Select>
         <Select value={priority} onValueChange={(v) => setPriority(v as typeof priority)}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All Priorities" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-36"><SelectValue placeholder="All Priorities" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Priorities</SelectItem>
             <SelectItem value="Low">Low</SelectItem>
@@ -104,7 +104,7 @@ export default function Tasks() {
             <SelectItem value="Urgent">Urgent</SelectItem>
           </SelectContent>
         </Select>
-        <Button size="sm" onClick={() => setNewOpen(true)}>
+        <Button size="sm" onClick={() => setNewOpen(true)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           New Task
         </Button>
@@ -122,9 +122,9 @@ export default function Tasks() {
             onClick={() => setSelectedTask(task)}
           >
             <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-medium">{task.title}</p>
                     <span className="text-xs text-muted-foreground">{task.priority}</span>
                   </div>
@@ -143,7 +143,7 @@ export default function Tasks() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                   <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", statusColors[task.status])}>
                     {task.status === "in_progress" ? "In Progress" : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                   </span>
@@ -188,7 +188,7 @@ export default function Tasks() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Assign To</Label>
                 <Select value={form.assignedTo} onValueChange={(v) => setForm({ ...form, assignedTo: v })}>

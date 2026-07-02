@@ -51,9 +51,9 @@ export default function ChecklistTab({ residentId }: ChecklistTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Checklists</h3>
-        <Button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Checklists</h3>
+        <Button className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           New Checklist
         </Button>

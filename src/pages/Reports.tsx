@@ -73,10 +73,10 @@ export default function Reports() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Select value={range} onValueChange={setRange}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="this-week">This Week</SelectItem>
               <SelectItem value="this-month">This Month</SelectItem>
@@ -84,7 +84,7 @@ export default function Reports() {
             </SelectContent>
           </Select>
           <Select value={reportType} onValueChange={setReportType}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Reports</SelectItem>
               <SelectItem value="clinical">Clinical</SelectItem>
@@ -92,10 +92,11 @@ export default function Reports() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button
             size="sm"
             variant="outline"
+            className="flex-1 sm:flex-none"
             onClick={() => toast({ title: "Export started", description: "Generating PDF export…" })}
           >
             <Download className="h-4 w-4 mr-1" /> Export PDF
@@ -103,6 +104,7 @@ export default function Reports() {
           <Button
             size="sm"
             variant="outline"
+            className="flex-1 sm:flex-none"
             onClick={() => toast({ title: "Export started", description: "Generating Excel export…" })}
           >
             <Download className="h-4 w-4 mr-1" /> Export Excel
@@ -110,7 +112,7 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard title="Active Residents" value={residents.length} icon={Users} iconColor="text-blue-600" />
         <StatsCard title="Pending Tasks" value={tasks.filter((t) => t.status === "pending").length} icon={ClipboardList} iconColor="text-orange-600" />
         <StatsCard title="Active Wounds" value={wounds.filter((w) => w.status === "active").length} icon={BedDouble} iconColor="text-red-600" />
@@ -121,35 +123,39 @@ export default function Reports() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm font-semibold mb-2">Care Level Distribution</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={careLevelData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={80} paddingAngle={2}>
-                  {careLevelData.map((entry) => (
-                    <Cell key={entry.name} fill={careLevelColors[entry.name]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="min-h-[200px]">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={careLevelData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={80} paddingAngle={2}>
+                    {careLevelData.map((entry) => (
+                      <Cell key={entry.name} fill={careLevelColors[entry.name]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm font-semibold mb-2">Task Status Overview</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={statusData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {statusData.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="min-h-[200px]">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={statusData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {statusData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -157,18 +163,20 @@ export default function Reports() {
       <Card>
         <CardContent className="p-4">
           <p className="text-sm font-semibold mb-2">Weekly Activity Summary</p>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={weeklyActivity}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="notes" name="Progress Notes" stroke="#3b82f6" />
-              <Line type="monotone" dataKey="tasks" name="Tasks" stroke="#ef4444" />
-              <Line type="monotone" dataKey="wounds" name="Wound Updates" stroke="#22c55e" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="min-h-[220px]">
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={weeklyActivity}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="notes" name="Progress Notes" stroke="#3b82f6" />
+                <Line type="monotone" dataKey="tasks" name="Tasks" stroke="#ef4444" />
+                <Line type="monotone" dataKey="wounds" name="Wound Updates" stroke="#22c55e" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 

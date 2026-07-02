@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, Search, User } from "lucide-react";
+import { Bell, ChevronDown, Menu, Search, User } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,6 @@ import { appNotifications } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import { useUser, roles } from "@/context/UserContext";
 
-// Static per-route page titles shown in the top bar. The Dashboard subtitle
-// is built with the signed-in first name, so it's handled separately below.
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
   "/residents": { title: "Residents", subtitle: "Manage and view all resident information" },
   "/tasks": { title: "Tasks", subtitle: "Manage and track all clinical tasks" },
@@ -27,9 +25,10 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
 
 interface HeaderProps {
   collapsed: boolean;
+  onMenuClick: () => void;
 }
 
-export default function Header({ collapsed }: HeaderProps) {
+export default function Header({ collapsed, onMenuClick }: HeaderProps) {
   const { name, role, setRole } = useUser();
   const { pathname } = useLocation();
   const firstName = name.split(" ")[0];
@@ -45,19 +44,32 @@ export default function Header({ collapsed }: HeaderProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 z-30 h-20 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4 px-8 transition-[left] duration-200",
-        collapsed ? "left-20" : "left-64"
+        "fixed top-0 right-0 z-30 h-16 sm:h-20 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-8 transition-[left] duration-200 left-0",
+        collapsed ? "lg:left-20" : "lg:left-64"
       )}
     >
-      <div className="min-w-0">
-        <h1 className="text-2xl font-bold leading-tight">{meta.title}</h1>
-        {meta.subtitle && (
-          <p className="text-sm text-muted-foreground truncate">{meta.subtitle}</p>
-        )}
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0 lg:hidden"
+          onClick={onMenuClick}
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold leading-tight truncate">{meta.title}</h1>
+          {meta.subtitle && (
+            <p className="text-xs sm:text-sm text-muted-foreground truncate hidden sm:block">
+              {meta.subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
-        <div className="relative w-[22rem] hidden md:block">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="relative w-48 xl:w-[22rem] hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search residents, tasks..."
@@ -67,14 +79,14 @@ export default function Header({ collapsed }: HeaderProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative shrink-0">
               <Bell className="h-5 w-5" />
               {appNotifications.length > 0 && (
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
+          <DropdownMenuContent align="end" className="w-72 max-w-[calc(100vw-2rem)]">
             <DropdownMenuLabel className="flex items-center justify-between">
               Notifications
               <Badge variant="secondary" className="text-xs">
@@ -97,15 +109,15 @@ export default function Header({ collapsed }: HeaderProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button variant="ghost" className="flex items-center gap-2 px-2 sm:px-3">
               <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
                 <User className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="text-left hidden sm:block">
                 <p className="text-sm font-medium leading-none">{name}</p>
-                <p className="text-xs text-muted-foreground">{role}</p>
+                <p className="text-xs text-muted-foreground hidden md:block">{role}</p>
               </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">

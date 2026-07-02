@@ -23,7 +23,7 @@ import { toast } from "@/hooks/use-toast";
 const emptyStaff = { name: "", email: "", role: "Carer", shift: "Morning" as StaffUser["shift"] };
 
 const tabTriggerClass =
-  "gap-2 rounded-lg border border-transparent bg-slate-100 px-4 py-2.5 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:border-slate-200 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm";
+  "gap-1.5 sm:gap-2 rounded-lg border border-transparent bg-slate-100 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-muted-foreground shadow-none data-[state=active]:border-slate-200 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm";
 
 const notificationItems = [
   { key: "taskAssignments" as const, label: "Task Assignments", desc: "Get notified when a task is assigned to you" },
@@ -110,7 +110,7 @@ export default function Settings() {
 
         <TabsContent value="profile" className="mt-6 space-y-6">
           <Card className="border-slate-200 shadow-sm">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <h3 className="text-base font-semibold mb-6">User Profile</h3>
               <div className="flex flex-col sm:flex-row gap-8">
                 <div className="flex flex-col items-center sm:items-start gap-3 shrink-0">
@@ -175,7 +175,7 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+              <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-slate-100">
                 <Button onClick={() => toast({ title: "Profile saved", description: "Your profile changes have been saved." })}>
                   Save Changes
                 </Button>
@@ -200,7 +200,7 @@ export default function Settings() {
           </Card>
 
           <Card className="border-slate-200 shadow-sm">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <h3 className="text-base font-semibold mb-6">Change Password</h3>
               <div className="max-w-md space-y-4">
                 <div className="space-y-1.5">
@@ -247,22 +247,22 @@ export default function Settings() {
 
         <TabsContent value="roles" className="mt-6">
           <Card className="border-slate-200 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <h3 className="text-base font-semibold">Staff & Roles</h3>
-                <Button size="sm" onClick={() => setAddUserOpen(true)}>
+                <Button size="sm" onClick={() => setAddUserOpen(true)} className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-1.5" /> Add User
                 </Button>
               </div>
-              <div className="rounded-lg border border-slate-200 overflow-hidden">
+              <div className="rounded-lg border border-slate-200 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50 hover:bg-slate-50 border-slate-200">
-                      <TableHead className="text-muted-foreground font-medium">Name</TableHead>
-                      <TableHead className="text-muted-foreground font-medium">Email</TableHead>
-                      <TableHead className="text-muted-foreground font-medium">Role</TableHead>
-                      <TableHead className="text-muted-foreground font-medium">Shift</TableHead>
-                      <TableHead className="text-muted-foreground font-medium text-right">Actions</TableHead>
+                      <TableHead className="text-muted-foreground font-medium whitespace-nowrap">Name</TableHead>
+                      <TableHead className="text-muted-foreground font-medium whitespace-nowrap hidden sm:table-cell">Email</TableHead>
+                      <TableHead className="text-muted-foreground font-medium whitespace-nowrap">Role</TableHead>
+                      <TableHead className="text-muted-foreground font-medium whitespace-nowrap hidden md:table-cell">Shift</TableHead>
+                      <TableHead className="text-muted-foreground font-medium text-right whitespace-nowrap">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -276,13 +276,13 @@ export default function Settings() {
                             <span className="text-sm font-medium">{s.name}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground py-3.5">{s.email}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground py-3.5 hidden sm:table-cell">{s.email}</TableCell>
                         <TableCell className="py-3.5">
-                          <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 font-normal border-0 shadow-none">
+                          <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 font-normal border-0 shadow-none whitespace-nowrap">
                             {s.role}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm py-3.5">{s.shift}</TableCell>
+                        <TableCell className="text-sm py-3.5 hidden md:table-cell">{s.shift}</TableCell>
                         <TableCell className="py-3.5">
                           <div className="flex items-center justify-end gap-1">
                             <Button
@@ -314,7 +314,7 @@ export default function Settings() {
 
         <TabsContent value="notifications" className="mt-6">
           <Card className="border-slate-200 shadow-sm">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <h3 className="text-base font-semibold mb-2">Notification Preferences</h3>
               <div className="divide-y divide-slate-100">
                 {notificationItems.map((item) => (
@@ -342,7 +342,7 @@ export default function Settings() {
 
         <TabsContent value="preferences" className="mt-6">
           <Card className="border-slate-200 shadow-sm">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <h3 className="text-base font-semibold mb-6">System Preferences</h3>
               <div className="max-w-lg space-y-5">
                 <div className="space-y-1.5">
@@ -428,7 +428,7 @@ export default function Settings() {
               <Label className="text-sm">Email</Label>
               <Input type="email" value={newStaff.email} onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-sm">Role</Label>
                 <Select value={newStaff.role} onValueChange={(v) => setNewStaff({ ...newStaff, role: v })}>
@@ -475,7 +475,7 @@ export default function Settings() {
                 <Label className="text-sm">Email</Label>
                 <Input type="email" value={editUser.email} onChange={(e) => setEditUser({ ...editUser, email: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-sm">Role</Label>
                   <Select value={editUser.role} onValueChange={(v) => setEditUser({ ...editUser, role: v })}>

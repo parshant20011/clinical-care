@@ -59,7 +59,7 @@ export default function Documents() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-48">
+        <div className="relative w-full sm:flex-1 sm:min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search documents..."
@@ -69,7 +69,7 @@ export default function Documents() {
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="All Categories" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="All Categories" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories.map((c) => (
@@ -78,7 +78,7 @@ export default function Documents() {
           </SelectContent>
         </Select>
         <Select value={type} onValueChange={setType}>
-          <SelectTrigger className="w-32"><SelectValue placeholder="All Types" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-32"><SelectValue placeholder="All Types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             {types.map((t) => (
@@ -86,7 +86,7 @@ export default function Documents() {
             ))}
           </SelectContent>
         </Select>
-        <Button size="sm" onClick={() => setUploadOpen(true)}>
+        <Button size="sm" onClick={() => setUploadOpen(true)} className="w-full sm:w-auto">
           <Upload className="h-4 w-4 mr-1" />
           Upload Document
         </Button>
@@ -144,7 +144,7 @@ export default function Documents() {
               <Label className="text-xs">Document Name</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Category</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>

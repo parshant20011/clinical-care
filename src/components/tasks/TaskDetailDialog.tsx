@@ -37,7 +37,7 @@ export default function TaskDetailDialog({ task, open, onOpenChange, onMarkCompl
           <p className="text-xs text-muted-foreground mb-1">Description</p>
           <p className="text-sm">{task.notes || "No description provided."}</p>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs text-muted-foreground">Resident</p>
             <p className="text-sm font-medium">{task.residentName}</p>

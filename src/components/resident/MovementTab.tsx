@@ -36,9 +36,9 @@ export default function MovementTab({ residentId }: MovementTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Movement Log</h3>
-        <Button onClick={() => setShowForm(!showForm)}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Movement Log</h3>
+        <Button onClick={() => setShowForm(!showForm)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           Log Movement
         </Button>
@@ -67,7 +67,7 @@ export default function MovementTab({ residentId }: MovementTabProps) {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Date</Label>
               <Input type="date" className="mt-1" />
@@ -81,7 +81,7 @@ export default function MovementTab({ residentId }: MovementTabProps) {
             <Label className="text-xs">Notes</Label>
             <Textarea placeholder="Add notes..." rows={2} className="mt-1" />
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button size="sm" onClick={handleSave}>Save Movement</Button>
             <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
               Cancel

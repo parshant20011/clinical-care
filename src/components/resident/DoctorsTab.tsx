@@ -24,9 +24,9 @@ export default function DoctorsTab({ resident }: DoctorsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Doctors</h3>
-        <Button onClick={() => toast({ title: "Add Doctor", description: "Doctor form coming soon." })}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Doctors</h3>
+        <Button onClick={() => toast({ title: "Add Doctor", description: "Doctor form coming soon." })} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           Add Doctor
         </Button>

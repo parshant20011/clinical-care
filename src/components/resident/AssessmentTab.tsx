@@ -35,9 +35,9 @@ export default function AssessmentTab({ residentId }: AssessmentTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Assessments</h3>
-        <Button onClick={() => setOpen(true)}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Assessments</h3>
+        <Button onClick={() => setOpen(true)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           New Assessment
         </Button>
@@ -51,13 +51,13 @@ export default function AssessmentTab({ residentId }: AssessmentTabProps) {
         ) : (
           records.map((a) => (
             <div key={a.id} className="border rounded-lg p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                 <p className="text-sm font-semibold">{a.name}</p>
                 <Badge className="bg-blue-50 text-blue-600 hover:bg-blue-50 border-transparent">
                   {a.status}
                 </Badge>
               </div>
-              <div className="flex items-center gap-4 mt-1.5 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {a.date}

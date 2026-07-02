@@ -22,11 +22,12 @@ export default function CardsTab({ resident }: CardsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Cards &amp; Verification</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Cards &amp; Verification</h3>
         <Button
           variant="outline"
           onClick={() => toast({ title: "Verifying all cards…" })}
+          className="w-full sm:w-auto"
         >
           <RefreshCw className="h-4 w-4 mr-1" />
           Verify All

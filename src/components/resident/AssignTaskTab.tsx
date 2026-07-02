@@ -43,7 +43,7 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-bold">Assign Task</h3>
+      <h3 className="text-base sm:text-lg font-bold">Assign Task</h3>
 
       <div className="space-y-4 max-w-2xl">
         <div>
@@ -128,8 +128,8 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
           {residentTasks.map((task) => (
             <Card key={task.id}>
               <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="text-sm font-medium">{task.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Assigned to: {task.assignedTo}
@@ -144,7 +144,7 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
                       statusColors[task.status as keyof typeof statusColors]
                     )}
                   >
-                    {task.status}
+                    {task.status === "in_progress" ? "In Progress" : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                   </span>
                 </div>
               </CardContent>

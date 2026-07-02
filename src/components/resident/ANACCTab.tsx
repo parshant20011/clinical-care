@@ -24,15 +24,15 @@ export default function ANACCTab({ resident }: ANACCTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">AN-ACC Assessment</h3>
-        <Button onClick={() => toast({ title: "Assessment updated" })}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">AN-ACC Assessment</h3>
+        <Button onClick={() => toast({ title: "Assessment updated" })} className="w-full sm:w-auto">
           <Pencil className="h-4 w-4 mr-1" />
           Update Assessment
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-lg border border-l-4 border-l-blue-600 p-4">
           <p className="text-xs text-muted-foreground flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" /> Funding Class
@@ -82,8 +82,8 @@ export default function ANACCTab({ resident }: ANACCTabProps) {
 
       <div className="border rounded-lg p-4 space-y-3">
         <p className="text-sm font-semibold">IHI Verification</p>
-        <div className="flex items-center gap-3">
-          <Input value={detail.ihiNumber} readOnly className="max-w-sm" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <Input value={detail.ihiNumber} readOnly className="w-full sm:max-w-sm" />
           {detail.ihiVerified && (
             <span className="flex items-center gap-1 text-sm text-green-600 font-medium whitespace-nowrap">
               <CheckCircle2 className="h-4 w-4" />

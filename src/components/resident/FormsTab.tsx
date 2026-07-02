@@ -19,9 +19,9 @@ export default function FormsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Clinical Forms</h3>
-        <Button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Clinical Forms</h3>
+        <Button className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           Create New Form
         </Button>

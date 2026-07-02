@@ -25,9 +25,9 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Personal Details</h3>
-        <Button onClick={() => toast({ title: "Edit Details", description: "Editing coming soon." })}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Personal Details</h3>
+        <Button onClick={() => toast({ title: "Edit Details", description: "Editing coming soon." })} className="w-full sm:w-auto">
           <Pencil className="h-4 w-4 mr-1" />
           Edit Details
         </Button>
@@ -39,7 +39,7 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
             <User className="h-4 w-4 text-blue-600" />
             <p className="text-sm font-semibold">Personal Information</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="First Name" value={firstName} />
             <Field label="Last Name" value={lastName || "—"} />
             <Field label="Age" value={`${resident.age} years`} />
@@ -54,7 +54,7 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
             <Heart className="h-4 w-4 text-red-500" />
             <p className="text-sm font-semibold">Medical Information</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="col-span-2">
               <Field label="Primary Diagnosis" value={resident.diagnosis} />
             </div>
@@ -87,7 +87,7 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
             <Calendar className="h-4 w-4 text-blue-600" />
             <p className="text-sm font-semibold">Admission Details</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Date of Admission" value={resident.doa} />
             <Field label="Status" value={resident.accountStatus} />
           </div>

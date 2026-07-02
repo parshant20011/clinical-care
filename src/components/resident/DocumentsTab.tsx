@@ -18,9 +18,9 @@ export default function DocumentsTab({ residentId }: DocumentsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Documents</h3>
-        <Button onClick={() => toast({ title: "Upload started", description: "Select a file to upload." })}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Documents</h3>
+        <Button onClick={() => toast({ title: "Upload started", description: "Select a file to upload." })} className="w-full sm:w-auto">
           <Upload className="h-4 w-4 mr-1" />
           Upload Document
         </Button>
@@ -43,7 +43,7 @@ export default function DocumentsTab({ residentId }: DocumentsTabProps) {
           </p>
         ) : (
           docs.map((doc) => (
-            <div key={doc.id} className="border rounded-lg p-4 flex items-center gap-3">
+            <div key={doc.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
                 <FileText className="h-4 w-4 text-red-500" />
               </div>
@@ -53,7 +53,7 @@ export default function DocumentsTab({ residentId }: DocumentsTabProps) {
                   {doc.category} · {doc.size} · Uploaded {doc.uploadDate}
                 </p>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
                 <button
                   className="p-2 text-muted-foreground hover:text-foreground"
                   onClick={() => toast({ title: "Preview", description: `Previewing ${doc.name}` })}

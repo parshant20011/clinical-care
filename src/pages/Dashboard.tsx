@@ -15,7 +15,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatsCard title="Total Residents" value={totalResidents} icon={Users} iconColor="text-blue-600" tint="blue" />
         <StatsCard title="Active Tasks" value={activeTasks} icon={ClipboardList} iconColor="text-blue-600" />
         <StatsCard title="Pending Assessments" value={pendingAssessments} icon={FileSearch} iconColor="text-blue-600" />

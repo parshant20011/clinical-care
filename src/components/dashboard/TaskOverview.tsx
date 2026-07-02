@@ -24,8 +24,8 @@ export default function TaskOverview() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <CardTitle className="text-lg font-semibold">Active Tasks</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+        <CardTitle className="text-base sm:text-lg font-semibold">Active Tasks</CardTitle>
         <Button
           variant="ghost"
           size="sm"
@@ -35,21 +35,21 @@ export default function TaskOverview() {
           View all
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="space-y-3">
           {activeTasks.map((task) => {
             const status = statusConfig[task.status];
             return (
               <div
                 key={task.id}
-                className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 p-4"
+                className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 rounded-lg border border-slate-200 p-4"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-semibold leading-tight">{task.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{task.residentName}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{task.assignedTo}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-1.5 shrink-0">
                   <span
                     className={cn(
                       "text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap",

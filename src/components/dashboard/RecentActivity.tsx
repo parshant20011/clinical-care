@@ -14,10 +14,10 @@ const kindConfig: Record<ActivityItem["kind"], { icon: typeof FileText; bg: stri
 export default function RecentActivity() {
   return (
     <Card className="flex flex-col h-full">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+      <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+        <CardTitle className="text-base sm:text-lg font-semibold">Recent Activity</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col flex-1 pt-0">
+      <CardContent className="flex flex-col flex-1 pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="space-y-5 flex-1">
           {recentActivity.map((item) => {
             const config = kindConfig[item.kind];

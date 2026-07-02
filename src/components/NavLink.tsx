@@ -5,12 +5,14 @@ interface NavLinkProps {
   to: string;
   children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }
 
-export function NavLink({ to, children, className }: NavLinkProps) {
+export function NavLink({ to, children, className, onClick }: NavLinkProps) {
   return (
     <RouterNavLink
       to={to}
+      onClick={onClick}
       className={({ isActive }) =>
         cn(
           "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors",

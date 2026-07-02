@@ -60,14 +60,14 @@ export default function ResidentProfile() {
 
       {/* Resident Header */}
       <div className="border rounded-xl bg-card overflow-hidden">
-        <div className="flex items-start justify-between gap-6 p-6 flex-wrap">
+        <div className="flex items-start justify-between gap-4 sm:gap-6 p-4 sm:p-6 flex-wrap">
           <div className="flex items-start gap-4 min-w-0">
             <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl font-bold shrink-0">
               {resident.name.split(" ").map((n) => n[0]).join("")}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-bold">{resident.name}</h2>
+                <h2 className="text-lg sm:text-xl font-bold">{resident.name}</h2>
                 <Badge variant="outline" className={careLevelStyles[resident.careLevel]}>
                   {resident.careLevel} Care
                 </Badge>
@@ -95,7 +95,7 @@ export default function ResidentProfile() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0 w-full lg:w-auto">
             <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
               <p className="text-xs text-muted-foreground">Doctor</p>
               <p className="text-sm font-semibold mt-0.5">{primaryDoctor?.name ?? resident.doctor}</p>
@@ -118,7 +118,7 @@ export default function ResidentProfile() {
         </div>
 
         {resident.allergies.length > 0 && (
-          <div className="mx-6 mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2">
+          <div className="mx-4 sm:mx-6 mb-4 sm:mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-red-600">Allergies</p>
@@ -133,7 +133,7 @@ export default function ResidentProfile() {
       {/* Tabs */}
       <div className="border rounded-xl bg-card overflow-hidden">
         <Tabs defaultValue="progress-notes">
-          <TabsList className="flex w-full h-auto justify-start overflow-x-auto rounded-none border-b bg-transparent p-0 px-2">
+          <TabsList className="flex w-full h-auto justify-start overflow-x-auto rounded-none border-b bg-transparent p-0 px-1 sm:px-2">
             {[
               { value: "progress-notes", label: "Progress Notes" },
               { value: "checklists", label: "Checklist" },
@@ -155,14 +155,14 @@ export default function ResidentProfile() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 data-[state=active]:shadow-none"
+                className="shrink-0 whitespace-nowrap rounded-none border-b-2 border-transparent px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium text-muted-foreground data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 data-[state=active]:shadow-none"
               >
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <TabsContent value="progress-notes" className="mt-0">
               <ProgressNotesTab residentId={resident.id} />
             </TabsContent>

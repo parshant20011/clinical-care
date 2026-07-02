@@ -27,15 +27,15 @@ export default function CarePlanTab({ residentId }: CarePlanTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Care Plans</h3>
-        <Button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Care Plans</h3>
+        <Button className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           New Care Plan
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {carePlanCategories.map((cat) => {
           const Icon = categoryIcons[cat.slug];
           return (
@@ -61,7 +61,7 @@ export default function CarePlanTab({ residentId }: CarePlanTabProps) {
             return (
               <div key={plan.id} className="border rounded-lg overflow-hidden">
                 <button
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/20 transition-colors"
+                  className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 text-left hover:bg-muted/20 transition-colors"
                   onClick={() => setExpanded(isOpen ? null : plan.id)}
                 >
                   <div>

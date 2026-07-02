@@ -33,9 +33,9 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Clinical Charts</h3>
-        <Button onClick={() => toast({ title: "Entry added", description: "New chart entry recorded." })}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-bold">Clinical Charts</h3>
+        <Button onClick={() => toast({ title: "Entry added", description: "New chart entry recorded." })} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-1" />
           Add Entry
         </Button>
@@ -59,7 +59,7 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
         ))}
       </div>
 
-      <div className="border rounded-lg p-4">
+      <div className="border rounded-lg p-3 sm:p-4 overflow-x-auto">
         {active === "vitals" && (
           <>
             <p className="text-sm font-semibold mb-3">Blood Pressure &amp; Pulse</p>

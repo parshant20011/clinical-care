@@ -20,8 +20,8 @@ export default function ResidentSummary() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <CardTitle className="text-lg font-semibold">Residents Overview</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+        <CardTitle className="text-base sm:text-lg font-semibold">Residents Overview</CardTitle>
         <Button
           variant="ghost"
           size="sm"
@@ -31,7 +31,7 @@ export default function ResidentSummary() {
           View all
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {residents.slice(0, 6).map((resident) => (
             <div
