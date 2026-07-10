@@ -54,22 +54,30 @@ Each tab component lives in `src/components/resident/<Name>Tab.tsx` and receives
 ## Mock data shape (key interfaces)
 
 ```ts
-Resident { id, name, room, age, gender, doa, status, anAcc, ihi, urn, medicare,
-           diagnosis, allergies, nok, doctor, respite, onLeave, acdp, cpr,
-           bgl, mobile, alert, task }
+Resident { id, name, preferredName?, room, doa, age, gender, status, respite, onLeave,
+           acdp, cpr, bgl, mobile, ihi, anAcc, task, alert, doctor, medicareCard,
+           concessionNumber, nok, residence, urn, diagnosis, allergies, photo?,
+           careLevel, accountStatus, nationality? }
 
-Task { id, residentId, residentName, title, assignedTo, area, status, dueDate, notes }
+Task { id, residentId, residentName, title, assignedTo, area, status, dueDate, notes?,
+       priority, createdBy }
 
-ProgressNote { id, residentId, category, content, author, date }
+ProgressNote { id, residentId, date, time, category, note, author }
 
-CarePlan { id, residentId, type, observations, goals, interventions, status, reviewDate }
+Checklist { id, residentId, type, date, items: ChecklistItem[], completedBy? }
 
-Wound { id, residentId, location, stage, size, treatment, lastDressed, notes }
+CarePlan { id, residentId, type, observations, goals, interventions, reviewDate,
+           createdBy, createdAt, status }
 
-Movement { id, residentId, type, date, time, destination, notes }
+Wound { id, residentId, startedDate, onAdmission, woundType, location, dressingProduct,
+        nextDressing, lastReview, nextReview, status, lastPhoto? }
+
+Movement { id, residentId, date, time, type, note, recordedBy }
 ```
 
-Exported constants: `forms` (40+ names), `carePlanTypes` (22), `movementTypes` (22), `documentCategories` (16)
+Resident-profile detail domains (one array per tab, all keyed by `residentId`, covering all 5 mock residents): `residentDoctors`, `residentContacts`, `residentCards`, `vitalReadings`, `weightReadings`, `chartBglReadings`, `behaviorReadings`, `carePathways`, `assessmentRecords`, `anaccDetails`, `residentDocuments`. `chartBglReadings` only exists for residents with `bgl: true`.
+
+Facility-wide constants: `forms` (40+ names), `movementTypes` (22), `staffUsers`, `facilityDocuments`, `carePlanCategories` (7, used by the CarePlan tab's icon tiles), `clinicalForms` (used by the Forms tab).
 
 ---
 
