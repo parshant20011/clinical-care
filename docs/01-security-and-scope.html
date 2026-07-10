@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Care — Security & Functional Scope</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose', flowchart: { useMaxWidth: true } });
+</script>
+<style>
+  :root {
+    --ink: #1e2e3e; --muted: #5b6b7b; --line: #e2e8f0; --bg: #ffffff;
+    --accent: #2563eb; --accent-soft: #eff6ff; --green: #16a34a; --green-soft: #f0fdf4;
+    --amber: #d97706; --amber-soft: #fffbeb; --red: #dc2626; --red-soft: #fef2f2;
+    --code-bg: #f8fafc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); line-height: 1.6; margin: 0; background: #f1f5f9;
+  }
+  .page { max-width: 900px; margin: 0 auto; background: var(--bg); padding: 56px 64px; }
+  h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  h2 { font-size: 22px; margin: 44px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--line); letter-spacing: -0.01em; }
+  h3 { font-size: 17px; margin: 28px 0 8px; color: var(--ink); }
+  h4 { font-size: 15px; margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  p, li { font-size: 14.5px; }
+  code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; font-family: "SF Mono", Menlo, Consolas, monospace; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+  pre code { border: 0; padding: 0; background: none; }
+  .lead { color: var(--muted); font-size: 16px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .rec { background: var(--green-soft); border-left: 4px solid var(--green); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  .rec strong { color: var(--green); }
+  .warn { background: var(--amber-soft); border-left: 4px solid var(--amber); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  .warn strong { color: var(--amber); }
+  .crit { background: var(--red-soft); border-left: 4px solid var(--red); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  .crit strong { color: var(--red); }
+  .note { background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 11px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  .toc { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 20px 26px; margin: 24px 0; }
+  .toc ol { margin: 6px 0; padding-left: 22px; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; vertical-align: middle; }
+  .pill-now { background: var(--green-soft); color: var(--green); }
+  .pill-later { background: var(--amber-soft); color: var(--amber); }
+  .pill-future { background: #f3e8ff; color: #7c3aed; }
+  .mermaid { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin: 18px 0; text-align: center; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+  .legend span { margin-right: 16px; font-size: 13px; }
+  @media print {
+    body { background: #fff; }
+    .page { max-width: 100%; padding: 0; }
+    h2 { page-break-after: avoid; }
+    pre, .mermaid, table, .rec, .warn, .crit, .note { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Clinical Care Platform</h1>
+<p class="lead">Security Plan &amp; Functional Scope — with Database Design &amp; Recommendations</p>
+<p class="meta">Aged-care clinical management system (Amber Aged Care) · Prepared by engineering · Living document</p>
+
+<div class="legend">
+  <span><span class="pill pill-now">DO NOW</span> Phase 0–4 foundations</span>
+  <span><span class="pill pill-later">DO LATER</span> Pre-pilot hardening</span>
+  <span><span class="pill pill-future">FUTURE</span> Scale / certification</span>
+</div>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#overview">System Overview &amp; Threat Model</a></li>
+    <li><a href="#authn">1. Authentication</a></li>
+    <li><a href="#authz">2. Authorization (RBAC) &amp; Multi-Tenancy</a></li>
+    <li><a href="#data-protection">3. Data Protection (Encryption, PII, Residency)</a></li>
+    <li><a href="#audit">4. Audit Logging &amp; Accountability</a></li>
+    <li><a href="#api-security">5. API &amp; Transport Security</a></li>
+    <li><a href="#input">6. Input Validation &amp; Injection Defense</a></li>
+    <li><a href="#secrets">7. Secrets &amp; Configuration</a></li>
+    <li><a href="#session">8. Session &amp; Token Management</a></li>
+    <li><a href="#compliance">9. Compliance (Australian Privacy Principles)</a></li>
+    <li><a href="#ai-security">10. AI Feature Security</a></li>
+    <li><a href="#db-design">11. Database Design (ERD + Scaling)</a></li>
+    <li><a href="#roadmap">12. Security Roadmap Summary</a></li>
+  </ol>
+</div>
+
+<h2 id="overview">System Overview &amp; Threat Model</h2>
+<p>The platform stores <strong>Personal Health Information (PHI)</strong> of aged-care residents: names, dates of birth, diagnoses, medications, wounds, behaviour notes, and national identifiers (<code>IHI</code>, Medicare, DVA). Under Australian law this is <strong>"sensitive information"</strong> — the highest-protection category under the Privacy Act 1988 and the Australian Privacy Principles (APPs).</p>
+
+<h4>Who we protect against</h4>
+<table>
+  <tr><th>Threat actor</th><th>Example attack</th><th>Primary control</th></tr>
+  <tr><td>External attacker</td><td>Credential stuffing, SQL injection, stolen JWT</td><td>Auth + rate limiting + parameterized queries (ORM)</td></tr>
+  <tr><td>Malicious insider</td><td>Staff snooping on residents not in their care</td><td>RBAC + audit log + least privilege</td></tr>
+  <tr><td>Curious insider</td><td>Carer viewing admin-only reports</td><td>Role-based UI + server-side authorization</td></tr>
+  <tr><td>Compromised device</td><td>XSS stealing tokens from browser storage</td><td>httpOnly cookies (tokens unreadable by JS)</td></tr>
+  <tr><td>Data-at-rest breach</td><td>Stolen DB backup / disk</td><td>Encryption at rest + column encryption for IDs</td></tr>
+</table>
+
+<div class="note"><strong>Golden rule.</strong> The frontend's role-based UI is a <em>convenience</em>, never a security control. Every permission decision is <strong>re-checked on the server</strong>. A user who forges a request must still be blocked by API-side RBAC.</div>
+
+<!-- ============================================================ -->
+<h2 id="authn">1. Authentication <span class="pill pill-now">DO NOW</span></h2>
+<p><strong>Requirement (from scope):</strong> "Create system users, assign roles, activate/deactivate, password reset."</p>
+
+<h4>What we are doing</h4>
+<ul>
+  <li>Email + password login. Passwords hashed with <strong>bcrypt</strong> (cost factor 12) — never stored or logged in plaintext.</li>
+  <li>On login, issue two JWTs: a short-lived <strong>access token</strong> (~15 min) and a long-lived <strong>refresh token</strong> (~7 days), both delivered as <code>httpOnly; Secure; SameSite=Strict</code> cookies.</li>
+  <li><code>POST /auth/login</code>, <code>/auth/logout</code>, <code>/auth/refresh</code>, <code>GET /auth/me</code>.</li>
+  <li>Account activate/deactivate flag checked on every request (deactivated user = instant lockout).</li>
+</ul>
+
+<div class="rec"><strong>Suggestion — go beyond the requirement.</strong> The scope only says "password reset," but for a clinical system I recommend: (1) <strong>account lockout</strong> after 5 failed attempts (throttle brute force); (2) <strong>password strength policy</strong> (min 12 chars, checked against the "Have I Been Pwned" breached-password API); (3) plan <strong>MFA (TOTP)</strong> for Admin/Care Manager roles before pilot — aged-care providers increasingly require it. These are cheap to add now and expensive to retrofit.</div>
+
+<div class="warn"><strong>Why bcrypt and not plain hashing?</strong> MD5/SHA-256 are fast — an attacker can try billions of guesses/sec against a stolen DB. bcrypt is deliberately slow and salted, making each guess expensive. <code>argon2id</code> is an even stronger modern alternative worth considering.</div>
+
+<!-- ============================================================ -->
+<h2 id="authz">2. Authorization (RBAC) &amp; Multi-Tenancy <span class="pill pill-now">DO NOW</span></h2>
+<p><strong>Requirement:</strong> "Assign user roles" — four roles: Registered Nurse, Care Manager, Admin, Carer.</p>
+
+<h4>What we are doing</h4>
+<ul>
+  <li>A shared <strong>permission map</strong> (<code>packages/shared/src/permissions.ts</code>) defines, per role, which actions (read/create/update/delete) are allowed on which resource (residents, clinical, tasks, documents, reports, staff, audit).</li>
+  <li>Express <code>rbac</code> middleware enforces it on every route <em>before</em> the controller runs.</li>
+  <li>The same map drives the frontend to hide buttons the user can't use.</li>
+</ul>
+
+<div class="rec"><strong>Suggestion — add tenant isolation from day one.</strong> The current plan is single-facility. Because you told me you want to <strong>scale</strong>, I recommend building <strong>multi-tenancy</strong> now: every table carries a <code>facilityId</code>, and a middleware injects the logged-in user's <code>facilityId</code> into every query. This means one deployment can safely serve many aged-care homes with zero data bleed between them — and retrofitting tenancy later is one of the most painful migrations there is. <em>I have baked this into the DB design in §11.</em></div>
+
+<div class="rec"><strong>Suggestion — resident-level access scoping (later).</strong> RBAC answers "can nurses edit notes?" It does <em>not</em> answer "can THIS nurse edit THIS resident?" For a pilot with one ward that's fine. Before multi-ward scale, add a <code>care_team</code> assignment table so a carer only sees residents in their assigned wing — the "minimum necessary access" principle that auditors look for.</div>
+
+<!-- ============================================================ -->
+<h2 id="data-protection">3. Data Protection <span class="pill pill-now">DO NOW</span></h2>
+<p><strong>Requirement:</strong> confidentiality banner — "handles personal and clinical data… do not share."</p>
+
+<h4>What we are doing</h4>
+<table>
+  <tr><th>Layer</th><th>Control</th></tr>
+  <tr><td>In transit</td><td>HTTPS/TLS everywhere (HSTS header forces it)</td></tr>
+  <tr><td>At rest</td><td>Managed-Postgres disk encryption (AES-256) + encrypted upload volume</td></tr>
+  <tr><td>Data residency</td><td>Database + file storage pinned to <strong>AWS Sydney (ap-southeast-2)</strong></td></tr>
+  <tr><td>In logs</td><td>PII redaction — no names/IHI/Medicare ever written to application logs</td></tr>
+</table>
+
+<div class="rec"><strong>Suggestion — column-level encryption for national identifiers.</strong> Disk encryption protects a stolen <em>disk</em>, but anyone with DB read access sees IHI/Medicare in plaintext. I recommend <strong>application-level encryption</strong> (or Postgres <code>pgcrypto</code>) specifically on <code>ihi</code>, <code>medicareCard</code>, and <code>dvaCard</code> columns, so even a DB dump leaks nothing usable. Decrypt only when displaying to an authorized user. This is a strong differentiator for aged-care buyers.</div>
+
+<div class="warn"><strong>Data residency is a legal requirement, not a preference.</strong> Australian health data generally must stay onshore. This constrains hosting (§ hosting) <em>and</em> any AI model calls (§10) — you cannot send resident data to a US-only LLM endpoint.</div>
+
+<!-- ============================================================ -->
+<h2 id="audit">4. Audit Logging &amp; Accountability <span class="pill pill-now">DO NOW</span></h2>
+<p><strong>Requirement:</strong> "User activity logs, record change history, access logs."</p>
+
+<h4>What we are doing</h4>
+<ul>
+  <li>An append-only <code>audit_log</code> table records every mutating action: <em>who</em> (staff id), <em>what</em> (action + entity + entity id), <em>when</em> (timestamp), <em>from where</em> (hashed IP). <strong>No PII in the log body.</strong></li>
+  <li>Written by Express middleware so no route can "forget" to log.</li>
+</ul>
+
+<div class="rec"><strong>Suggestion — capture read access too, and make it tamper-evident.</strong> The requirement says "access logs," which for health data means logging <em>views</em> of a resident record, not just edits (auditors ask "who looked at Mrs X?"). Also: make the audit log <strong>append-only at the DB level</strong> (revoke UPDATE/DELETE grants) and consider hash-chaining each row to the previous one, so tampering is detectable. This is what turns "we have logs" into "we can prove what happened."</div>
+
+<!-- ============================================================ -->
+<h2 id="api-security">5. API &amp; Transport Security <span class="pill pill-now">DO NOW</span></h2>
+<ul>
+  <li><strong>helmet</strong> — sets secure HTTP headers (CSP, HSTS, X-Frame-Options, etc.) in one line.</li>
+  <li><strong>CORS allowlist</strong> — only the known frontend origin may call the API (no wildcard).</li>
+  <li><strong>Rate limiting</strong> — <code>express-rate-limit</code>, tightest on <code>/auth</code> (defeats brute force).</li>
+</ul>
+<div class="rec"><strong>Suggestion.</strong> Add a strict <strong>Content-Security-Policy</strong> (helmet default is permissive) to blunt XSS, and put the API behind a <strong>WAF</strong> (Cloudflare/AWS WAF) before pilot for automated bot/OWASP protection.</div>
+
+<!-- ============================================================ -->
+<h2 id="input">6. Input Validation &amp; Injection Defense <span class="pill pill-now">DO NOW</span></h2>
+<ul>
+  <li><strong>zod schemas</strong> (in <code>packages/shared</code>) validate every request body/params — shared with the frontend forms, so validation rules can't drift.</li>
+  <li><strong>Prisma ORM</strong> parameterizes all queries → SQL injection is structurally prevented (no string-concatenated SQL).</li>
+  <li>React escapes output by default → stored-XSS is mitigated (never use <code>dangerouslySetInnerHTML</code> with resident data).</li>
+</ul>
+<div class="rec"><strong>Suggestion.</strong> Add server-side <strong>output sanitization</strong> for any rich-text/free-text clinical notes if you ever render them as HTML, and set a max request body size to prevent payload-bomb DoS.</div>
+
+<!-- ============================================================ -->
+<h2 id="secrets">7. Secrets &amp; Configuration <span class="pill pill-now">DO NOW</span></h2>
+<ul>
+  <li>All secrets (DB URL, JWT signing keys) in environment variables, never in git.</li>
+  <li><code>config/env.ts</code> validates env with zod at boot — the server <strong>refuses to start</strong> if a secret is missing (fail-fast, no silent insecure defaults).</li>
+  <li><code>.env.example</code> committed as documentation; real <code>.env</code> is gitignored.</li>
+</ul>
+<div class="rec"><strong>Suggestion.</strong> Before pilot, move secrets to a managed <strong>secrets manager</strong> (AWS Secrets Manager / Doppler) with rotation, rather than plain env files on the server.</div>
+
+<!-- ============================================================ -->
+<h2 id="session">8. Session &amp; Token Management <span class="pill pill-now">DO NOW</span></h2>
+<div class="note"><strong>Why httpOnly cookies, not localStorage?</strong> A token in <code>localStorage</code> is readable by any JavaScript — one XSS bug and the attacker steals the session. An <code>httpOnly</code> cookie is invisible to JS; the browser attaches it automatically and script can't read it. Combined with <code>SameSite=Strict</code> this also blocks CSRF. For PHI this is the correct choice.</div>
+<div class="rec"><strong>Suggestion.</strong> Add <strong>refresh-token rotation</strong> (issue a new refresh token on each use, invalidate the old) and a server-side <strong>token denylist</strong> so logout/deactivation revokes access immediately, rather than waiting for the 15-min access token to expire.</div>
+
+<!-- ============================================================ -->
+<h2 id="compliance">9. Compliance — Australian Privacy Principles <span class="pill pill-later">DO LATER</span></h2>
+<p>The scope document explicitly excludes compliance mapping, but for real residents it becomes mandatory. Key APPs and how the architecture supports them:</p>
+<table>
+  <tr><th>APP</th><th>Requirement</th><th>Our support</th></tr>
+  <tr><td>APP 1</td><td>Open & transparent handling</td><td>Privacy policy + documented data flows</td></tr>
+  <tr><td>APP 6</td><td>Use/disclose only for purpose collected</td><td>RBAC + audit log prove purpose-limited access</td></tr>
+  <tr><td>APP 11</td><td>Security of personal information</td><td>Encryption, access control, audit (§§1–8)</td></tr>
+  <tr><td>APP 12</td><td>Individual's right to access their data</td><td>Per-resident data export endpoint</td></tr>
+  <tr><td>APP 13</td><td>Correction of information</td><td>Edit flows + change history in audit log</td></tr>
+</table>
+<div class="rec"><strong>Suggestion.</strong> Add a <strong>consent-tracking table</strong> (the scope shows "Consented: N/A" fields already) and a <strong>data-retention policy</strong> with automated archival/deletion. Aged-care records have mandated retention periods; being able to prove retention + deletion is an audit checkbox. Budget for a third-party <strong>penetration test</strong> before go-live.</div>
+
+<!-- ============================================================ -->
+<h2 id="ai-security">10. AI Feature Security <span class="pill pill-future">FUTURE</span></h2>
+<p>The source PDFs flag two AI features: <strong>Care Plan AI summary</strong> and <strong>Care Statements generation</strong>. Both send clinical data to a language model — the highest-risk data flow in the system.</p>
+<h4>Planned architecture</h4>
+<ul>
+  <li>A <strong>separate AI service</strong> (never in the request path of clinical writes) that reads structured data + notes and drafts summaries.</li>
+  <li>Clinical text embedded with <strong>pgvector</strong> for semantic search / retrieval-augmented generation (RAG) over a resident's own history only.</li>
+  <li>Every AI output is <strong>human-reviewed</strong> before saving, and stored flagged as <em>"AI-drafted / clinician-approved by X."</em></li>
+</ul>
+<div class="crit"><strong>Non-negotiable AI controls.</strong> (1) <strong>Data residency</strong> — use an AU-region model endpoint (e.g. Azure OpenAI Australia East or AWS Bedrock Sydney); do not call a US-only API with resident data. (2) <strong>No training on your data</strong> — contractually ensure the provider won't retain/train on prompts. (3) <strong>Minimize the prompt</strong> — send only the clinical facts needed, strip direct identifiers where possible. (4) <strong>Log every AI call</strong> to the audit trail. (5) <strong>Never auto-save AI output</strong> into a clinical record without a clinician's explicit approval — the human is accountable, the AI is a drafting assistant.</div>
+<div class="rec"><strong>Suggestion — scope AI narrowly at first.</strong> Start with the lowest-risk, highest-value use: <em>summarizing a resident's recent progress notes into a handover paragraph</em>. It's bounded, obviously useful to nurses, and easy to review. Defer anything that looks like clinical decision-making (risk scoring, medication suggestions) until you have clinical governance sign-off — that territory carries regulatory (TGA "software as a medical device") implications.</div>
+
+<!-- ============================================================ -->
+<h2 id="db-design">11. Database Design</h2>
+<p>Postgres, normalized, multi-tenant. <code>Facility</code> is the tenant root; <code>Resident</code> is the clinical hub with many resident-scoped child tables. <code>Staff</code> and <code>AuditLog</code> are facility-scoped. Diagram below (simplified — child clinical tables all follow the same <code>resident_id</code> FK pattern).</p>
+
+<div class="mermaid">
+erDiagram
+    FACILITY ||--o{ STAFF : employs
+    FACILITY ||--o{ RESIDENT : houses
+    FACILITY ||--o{ AUDIT_LOG : records
+
+    STAFF ||--o{ TASK : "assigned"
+    STAFF ||--o{ PROGRESS_NOTE : authors
+    STAFF ||--o{ AUDIT_LOG : "acts"
+
+    RESIDENT ||--o{ PROGRESS_NOTE : has
+    RESIDENT ||--o{ TASK : has
+    RESIDENT ||--o{ CHECKLIST : has
+    RESIDENT ||--o{ CARE_PLAN : has
+    RESIDENT ||--o{ WOUND : has
+    RESIDENT ||--o{ MOVEMENT : has
+    RESIDENT ||--o{ ALLERGY : has
+    RESIDENT ||--o{ RESIDENT_DOCTOR : has
+    RESIDENT ||--o{ CONTACT : has
+    RESIDENT ||--o{ CARD : has
+    RESIDENT ||--o{ VITAL_READING : has
+    RESIDENT ||--o{ ASSESSMENT : has
+    RESIDENT ||--|| ANACC_DETAIL : has
+    RESIDENT ||--o{ CARE_PATHWAY : has
+    RESIDENT ||--o{ DOCUMENT : has
+    CHECKLIST ||--o{ CHECKLIST_ITEM : contains
+
+    FACILITY {
+        uuid id PK
+        string name
+        string region "ap-southeast-2"
+        timestamp created_at
+    }
+    STAFF {
+        uuid id PK
+        uuid facility_id FK
+        string email UK
+        string password_hash
+        string name
+        enum role "RN|CARE_MGR|ADMIN|CARER"
+        boolean active
+    }
+    RESIDENT {
+        uuid id PK
+        uuid facility_id FK
+        string name
+        date dob
+        string ihi "encrypted"
+        string medicare_card "encrypted"
+        enum care_level "Low|Medium|High"
+        enum status "Permanent|Respite"
+        string diagnosis
+    }
+    PROGRESS_NOTE {
+        uuid id PK
+        uuid resident_id FK
+        uuid author_id FK
+        enum category
+        text note
+        vector embedding "pgvector (AI)"
+        timestamp created_at
+    }
+    TASK {
+        uuid id PK
+        uuid resident_id FK
+        uuid assigned_to FK
+        string title
+        enum priority
+        enum status
+        date due_date
+    }
+    AUDIT_LOG {
+        uuid id PK
+        uuid facility_id FK
+        uuid actor_id FK
+        string action
+        string entity
+        uuid entity_id
+        string ip_hash
+        timestamp at
+    }
+    CARE_PLAN {
+        uuid id PK
+        uuid resident_id FK
+        string type
+        text observations
+        text goals
+        text interventions
+        enum status
+    }
+    WOUND {
+        uuid id PK
+        uuid resident_id FK
+        string location
+        string wound_type
+        enum status
+    }
+    VITAL_READING {
+        uuid id PK
+        uuid resident_id FK
+        int systolic
+        int diastolic
+        int pulse
+        timestamp recorded_at
+    }
+    ASSESSMENT {
+        uuid id PK
+        uuid resident_id FK
+        string name
+        int score
+        enum status
+    }
+    ANACC_DETAIL {
+        uuid id PK
+        uuid resident_id FK
+        string funding_class
+        string daily_rate
+    }
+    CHECKLIST {
+        uuid id PK
+        uuid resident_id FK
+        string type
+        date date
+    }
+    CHECKLIST_ITEM {
+        uuid id PK
+        uuid checklist_id FK
+        string name
+        boolean completed
+    }
+    ALLERGY {
+        uuid id PK
+        uuid resident_id FK
+        string description
+        enum severity
+    }
+    MOVEMENT {
+        uuid id PK
+        uuid resident_id FK
+        string type
+        date date
+    }
+    RESIDENT_DOCTOR {
+        uuid id PK
+        uuid resident_id FK
+        string name
+        string specialty
+        boolean primary
+    }
+    CONTACT {
+        uuid id PK
+        uuid resident_id FK
+        string name
+        string relationship
+        boolean primary
+    }
+    CARD {
+        uuid id PK
+        uuid resident_id FK
+        enum type
+        string number "encrypted"
+        enum status
+    }
+    CARE_PATHWAY {
+        uuid id PK
+        uuid resident_id FK
+        string name
+        int total_steps
+        int completed_steps
+    }
+    DOCUMENT {
+        uuid id PK
+        uuid resident_id FK
+        string name
+        string category
+        string storage_key
+    }
+</div>
+
+<h4>Design decisions &amp; recommendations</h4>
+<table>
+  <tr><th>Decision</th><th>Rationale / Recommendation</th></tr>
+  <tr><td><strong>UUID primary keys</strong> (not auto-increment ints)</td><td>Mock data uses <code>"1"</code>, <code>"2"</code>. <span style="color:var(--green)">Recommend UUIDs</span>: non-guessable (can't enumerate residents by incrementing an ID), and safe to generate client-side / merge across facilities.</td></tr>
+  <tr><td><strong><code>facility_id</code> on every table</strong></td><td>Multi-tenancy foundation. A single <code>tenant</code> middleware scopes all queries. Add a composite index <code>(facility_id, resident_id)</code> on every clinical table.</td></tr>
+  <tr><td><strong>Allergies as their own table</strong></td><td>Mock nests them as a JSON array on Resident. <span style="color:var(--green)">Recommend normalizing</span> to a table so they're queryable ("show all penicillin-allergic residents") and reportable.</td></tr>
+  <tr><td><strong><code>embedding vector</code> on notes</strong></td><td>pgvector column reserved now (nullable) so the AI/RAG feature needs no schema migration later.</td></tr>
+  <tr><td><strong>Time-series tables</strong> (vitals, BGL, notes)</td><td>These grow fastest. <span style="color:var(--purple,#7c3aed)">Future:</span> partition by month and archive old partitions to keep queries fast at scale.</td></tr>
+  <tr><td><strong>Documents = metadata only</strong></td><td>Store the file in object storage (S3 Sydney); the DB row holds a <code>storage_key</code>, never the bytes. Cheaper, faster, and lets you encrypt/expire files independently.</td></tr>
+</table>
+
+<h4>Scaling plan <span class="pill pill-future">FUTURE</span></h4>
+<ul>
+  <li><strong>Reads:</strong> add Postgres read-replicas + a Redis cache for hot lookups (resident lists, dashboards).</li>
+  <li><strong>Writes:</strong> keep the API stateless behind a load balancer so you scale horizontally; the DB is the only stateful tier.</li>
+  <li><strong>Big tables:</strong> time-based partitioning on vitals/notes; move cold data to cheaper storage.</li>
+  <li><strong>Search:</strong> pgvector for semantic note search; add Postgres full-text or OpenSearch if keyword search across facilities is needed.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="roadmap">12. Security Roadmap Summary</h2>
+<table>
+  <tr><th>Phase</th><th>Security deliverables</th></tr>
+  <tr><td><strong>Now (Phase 0–4)</strong></td><td>bcrypt auth, JWT-httpOnly cookies, RBAC + multi-tenant scoping, zod validation, Prisma (SQLi-safe), audit log, helmet + CORS + rate limit, env validation, HTTPS, AU-region DB.</td></tr>
+  <tr><td><strong>Pre-pilot</strong></td><td>MFA for privileged roles, account lockout, column encryption for IHI/Medicare, read-access audit + append-only log, consent + retention tables, secrets manager, WAF, penetration test, APP compliance review.</td></tr>
+  <tr><td><strong>Scale / AI</strong></td><td>Care-team resident scoping, refresh-token rotation + denylist, AU-region LLM with no-train contract, pgvector RAG, read replicas + Redis, table partitioning, tamper-evident audit chain.</td></tr>
+</table>
+
+<hr>
+<p class="meta">This is a living document — revise as the architecture evolves. Pair it with <strong>02-technical-learning-guide.html</strong> for the code-level implementation walkthrough.</p>
+
+</div>
+</body>
+</html>

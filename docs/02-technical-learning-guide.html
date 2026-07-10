@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Care — Technical Learning Guide</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose', flowchart: { useMaxWidth: true }, sequence: { useMaxWidth: true } });</script>
+<style>
+  :root {
+    --ink: #1e2e3e; --muted: #5b6b7b; --line: #e2e8f0; --bg: #ffffff;
+    --accent: #2563eb; --accent-soft: #eff6ff; --green: #16a34a; --green-soft: #f0fdf4;
+    --amber: #d97706; --amber-soft: #fffbeb; --purple:#7c3aed; --purple-soft:#f3e8ff;
+    --code-bg: #f8fafc; --kw:#7c3aed; --str:#16a34a; --com:#94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); line-height: 1.65; margin: 0; background: #f1f5f9; }
+  .page { max-width: 920px; margin: 0 auto; background: var(--bg); padding: 56px 64px; }
+  h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  h2 { font-size: 23px; margin: 48px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 18px; margin: 30px 0 8px; }
+  h4 { font-size: 14px; margin: 22px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  p, li { font-size: 14.5px; }
+  code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 13px; font-family: "SF Mono", Menlo, Consolas, monospace; }
+  pre { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 16px 18px; overflow-x: auto; font-size: 12.5px; line-height: 1.6; }
+  pre code { border: 0; padding: 0; background: none; color: inherit; font-size: 12.5px; }
+  .lead { color: var(--muted); font-size: 16px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 11px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  .toc { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 20px 26px; margin: 24px 0; column-count: 2; }
+  .toc a { color: var(--accent); text-decoration: none; font-size: 13.5px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc div { margin: 3px 0; }
+  .def { background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  .def strong { color: var(--accent); }
+  .why { background: var(--amber-soft); border-left: 4px solid var(--amber); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  .why strong { color: var(--amber); }
+  .try { background: var(--green-soft); border-left: 4px solid var(--green); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; }
+  .try strong { color: var(--green); }
+  .mermaid { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin: 18px 0; text-align: center; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+  .filetree { font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; line-height: 1.7; background: var(--code-bg); border:1px solid var(--line); border-radius:8px; padding:16px 18px; white-space: pre; overflow-x:auto; }
+  .tag { display:inline-block; font-size:11px; font-weight:600; padding:1px 8px; border-radius:999px; background:var(--purple-soft); color:var(--purple); vertical-align:middle; }
+  @media print { body { background:#fff; } .page { max-width:100%; padding:0; } h2 { page-break-after: avoid; } pre, .mermaid, table, .def, .why, .try { page-break-inside: avoid; } .toc { column-count: 2; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Clinical Care — Technical Learning Guide</h1>
+<p class="lead">A complete, teach-yourself walkthrough: architecture, every flow, and every term/method used — so you can build an app like this yourself.</p>
+<p class="meta">Read top-to-bottom the first time. After that, use it as a reference. Boxes: <span class="tag">DEF</span> = plain-English definition · amber = why we do it · green = try it yourself.</p>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <div><a href="#mental-model">1. The mental model</a></div>
+  <div><a href="#stack">2. The stack, term by term</a></div>
+  <div><a href="#monorepo">3. Monorepo &amp; the shared package</a></div>
+  <div><a href="#frontend">4. Frontend architecture</a></div>
+  <div><a href="#components">5. Components, props, state, hooks</a></div>
+  <div><a href="#routing">6. Routing &amp; navigation</a></div>
+  <div><a href="#context">7. Context &amp; global state</a></div>
+  <div><a href="#backend">8. Backend architecture (layers)</a></div>
+  <div><a href="#db">9. Database, Prisma &amp; the ORM</a></div>
+  <div><a href="#api-flow">10. A request's full journey</a></div>
+  <div><a href="#auth-flow">11. Authentication flow</a></div>
+  <div><a href="#data-fetching">12. Data fetching (TanStack Query)</a></div>
+  <div><a href="#validation">13. Validation with zod</a></div>
+  <div><a href="#glossary">14. Glossary of every term</a></div>
+  <div><a href="#build-it">15. Build it yourself: checklist</a></div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="mental-model">1. The mental model</h2>
+<p>Every web app like this is three boxes talking to each other:</p>
+<div class="mermaid">
+flowchart LR
+    A["<b>Frontend</b><br/>(React in the browser)<br/>what the user sees & clicks"] -->|"HTTP request<br/>(fetch)"| B["<b>Backend / API</b><br/>(Express on a server)<br/>rules, auth, logic"]
+    B -->|"SQL query<br/>(via Prisma)"| C["<b>Database</b><br/>(Postgres)<br/>stores the data forever"]
+    C -->|"rows"| B
+    B -->|"JSON response"| A
+</div>
+<ul>
+  <li><strong>Frontend</strong> — runs in the user's browser. Draws the UI, handles clicks, but <em>owns no data</em>. When it needs data it asks the backend.</li>
+  <li><strong>Backend (API)</strong> — runs on a server you control. It's the <em>gatekeeper</em>: checks who you are (auth), what you're allowed to do (RBAC), validates input, then reads/writes the database.</li>
+  <li><strong>Database</strong> — the permanent memory. Everything else can restart and lose nothing because the truth lives here.</li>
+</ul>
+<div class="why"><strong>Why separate them?</strong> The browser can't be trusted (users can edit it, forge requests). So the browser never touches the database directly — it must go through the backend, which enforces all the rules. This separation is the single most important idea in web security.</div>
+<div class="def"><strong>Today vs. where we're going.</strong> Right now the app is <em>frontend-only</em>: it imports fake data from a <code>mockData.ts</code> file, so "adding a resident" just changes a JavaScript array in memory and is lost on refresh. The whole productionization project is about inserting the middle box (backend) and the right box (database) so data becomes <em>real and permanent</em>.</div>
+
+<!-- ===================================================== -->
+<h2 id="stack">2. The stack, term by term</h2>
+<table>
+  <tr><th>Tool</th><th>What it is (plain English)</th><th>Its job here</th></tr>
+  <tr><td><strong>React</strong></td><td>A JavaScript library for building UIs out of reusable "components."</td><td>Draws every screen.</td></tr>
+  <tr><td><strong>TypeScript</strong></td><td>JavaScript + types. Catches "you passed a number where a string was expected" before the code runs.</td><td>Safety net across the whole codebase.</td></tr>
+  <tr><td><strong>Vite</strong></td><td>A build tool + dev server. Bundles your code and gives instant hot-reload while developing.</td><td>Runs <code>npm run dev</code>, produces the production build.</td></tr>
+  <tr><td><strong>Tailwind CSS</strong></td><td>Styling by putting utility classes in the HTML (<code>class="p-4 text-blue-600"</code>) instead of writing separate CSS.</td><td>All visual styling.</td></tr>
+  <tr><td><strong>shadcn/ui</strong></td><td>A set of pre-built, copy-into-your-repo React components (button, dialog, table) built on Radix.</td><td>The UI building blocks in <code>components/ui</code>.</td></tr>
+  <tr><td><strong>React Router</strong></td><td>Maps URLs to components (<code>/residents</code> → the Residents page).</td><td>Navigation between pages.</td></tr>
+  <tr><td><strong>Node.js</strong></td><td>Lets JavaScript run <em>outside</em> the browser — on a server.</td><td>Runs the backend.</td></tr>
+  <tr><td><strong>Express</strong></td><td>A minimal framework for building an HTTP API in Node.</td><td>Defines the API endpoints.</td></tr>
+  <tr><td><strong>Postgres</strong></td><td>A relational (table-based) database.</td><td>Permanent storage.</td></tr>
+  <tr><td><strong>Prisma</strong></td><td>An ORM — lets you query the DB with typed JavaScript instead of raw SQL.</td><td>Talks to Postgres safely.</td></tr>
+  <tr><td><strong>zod</strong></td><td>A validation library — describe the shape data must have, get an error if it doesn't.</td><td>Validates every form + API request.</td></tr>
+  <tr><td><strong>TanStack Query</strong></td><td>Manages fetching/caching server data in React (loading states, refetching, cache).</td><td>Connects components to the API (Phase 4).</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="monorepo">3. Monorepo &amp; the shared package</h2>
+<div class="def"><strong>Monorepo</strong> = one git repository holding multiple projects (here: the frontend, the backend, and a shared library) that are developed together.</div>
+<div class="filetree">clinical-care/
+├─ apps/
+│  ├─ web/      ← the React frontend (browser)
+│  └─ api/      ← the Express backend (server)
+└─ packages/
+   └─ shared/   ← types, validation schemas, permission rules
+                  used by BOTH web and api</div>
+<div class="why"><strong>Why a shared package?</strong> The frontend and backend must <em>agree</em> on what a "Resident" looks like. If they each defined it separately, they'd drift apart and cause bugs. By defining <code>Resident</code> once in <code>packages/shared</code> and importing it in both, there is a single source of truth. Same for validation rules and permissions.</div>
+<div class="def"><strong>npm workspaces</strong> = npm's built-in way to manage a monorepo. One <code>npm install</code> at the root installs everything and links the packages together (so <code>import ... from "@clinical/shared"</code> just works).</div>
+
+<!-- ===================================================== -->
+<h2 id="frontend">4. Frontend architecture</h2>
+<div class="filetree">apps/web/src/
+├─ main.tsx          ← entry point: mounts React into the HTML
+├─ App.tsx           ← defines all the routes (URL → page)
+├─ pages/            ← one component per screen (Dashboard, Residents…)
+├─ components/
+│  ├─ ui/            ← generic building blocks (Button, Dialog, Table)
+│  ├─ layout/        ← Sidebar, Header, the page shell
+│  ├─ resident/     ← the 16 profile tabs
+│  └─ dashboard/    ← dashboard widgets
+├─ context/          ← global state (who's logged in)
+├─ hooks/            ← reusable bits of logic
+├─ lib/              ← helpers (e.g. the future API client)
+└─ data/mockData.ts  ← fake data (being replaced by the API)</div>
+<div class="def"><strong>Component</strong> = a reusable, self-contained piece of UI written as a function that returns JSX. <code>&lt;Button&gt;</code>, <code>&lt;ResidentProfile&gt;</code>, and a whole <code>&lt;Dashboard&gt;</code> page are all components. Small components compose into bigger ones.</div>
+<div class="def"><strong>JSX</strong> = the HTML-looking syntax inside React components (<code>return &lt;div&gt;Hello&lt;/div&gt;</code>). It's JavaScript in disguise — you can put variables in with <code>{ }</code>.</div>
+
+<!-- ===================================================== -->
+<h2 id="components">5. Components, props, state, hooks</h2>
+
+<h3>Props — passing data <em>in</em></h3>
+<div class="def"><strong>Props</strong> = the inputs to a component, like function arguments. The parent passes them down.</div>
+<pre><code>// Parent passes residentId DOWN to the child
+&lt;ProgressNotesTab residentId="1" /&gt;
+
+// Child receives it as props
+function ProgressNotesTab({ residentId }: { residentId: string }) {
+  // ...use residentId
+}</code></pre>
+
+<h3>State — data that changes over time</h3>
+<div class="def"><strong>State</strong> = data a component "remembers" between renders. When state changes, React automatically re-draws the component. Created with the <code>useState</code> hook.</div>
+<pre><code>const [showForm, setShowForm] = useState(false);
+//     ↑ current value  ↑ function to change it   ↑ initial value
+
+&lt;Button onClick={() =&gt; setShowForm(true)}&gt;Add Note&lt;/Button&gt;
+{showForm &amp;&amp; &lt;NoteForm /&gt;}   // form shows only when showForm is true</code></pre>
+<div class="why"><strong>Why not just a normal variable?</strong> A normal variable changing wouldn't tell React to redraw the screen. <code>useState</code> is the bridge: "when this value changes, update the UI."</div>
+
+<h3>Hooks — reusable logic</h3>
+<div class="def"><strong>Hook</strong> = a special function (name starts with <code>use</code>) that lets a component tap into React features or share logic. Built-in ones: <code>useState</code> (state), <code>useEffect</code> (run code after render, e.g. fetch data), <code>useContext</code> (read global state). You can write your own — e.g. our future <code>useResidents()</code>.</div>
+<pre><code>// useEffect: "after this component appears, do something"
+useEffect(() =&gt; {
+  document.title = "Residents";
+}, []);  // [] = run once when the component first mounts</code></pre>
+
+<h3>The render cycle</h3>
+<div class="mermaid">
+flowchart LR
+    A[Component runs] --> B[Returns JSX]
+    B --> C[React draws it]
+    C --> D{State or props change?}
+    D -->|yes| A
+    D -->|no| E[Stays as-is]
+</div>
+
+<!-- ===================================================== -->
+<h2 id="routing">6. Routing &amp; navigation</h2>
+<div class="def"><strong>Routing</strong> = deciding which component to show based on the URL. A <strong>Single-Page App (SPA)</strong> never reloads the page; the router swaps components in place, so navigation feels instant.</div>
+<pre><code>&lt;Routes&gt;
+  &lt;Route path="/" element={&lt;AppLayout /&gt;}&gt;      // shared shell (sidebar+header)
+    &lt;Route index element={&lt;Dashboard /&gt;} /&gt;      // "/" shows Dashboard
+    &lt;Route path="residents" element={&lt;Residents /&gt;} /&gt;
+    &lt;Route path="residents/:id" element={&lt;ResidentProfile /&gt;} /&gt;  // :id = variable
+  &lt;/Route&gt;
+&lt;/Routes&gt;</code></pre>
+<ul>
+  <li><code>:id</code> is a <strong>URL parameter</strong> — <code>/residents/3</code> makes <code>id = "3"</code>, read with <code>useParams()</code>.</li>
+  <li><strong>Nested routes</strong>: everything inside <code>AppLayout</code> renders where its <code>&lt;Outlet /&gt;</code> is — that's how the sidebar/header stay put while the page content changes.</li>
+  <li><code>useNavigate()</code> programmatically changes the URL (e.g. click a row → go to that resident).</li>
+</ul>
+<div class="def"><strong>The <code>_redirects</code> file</strong> (<code>/* /index.html 200</code>) exists because in an SPA the server only has one real HTML file. Without this rule, refreshing on <code>/residents</code> would 404. It tells the host "for any URL, serve index.html and let React Router sort it out."</div>
+
+<!-- ===================================================== -->
+<h2 id="context">7. Context &amp; global state</h2>
+<div class="def"><strong>Context</strong> = a way to share data with many components without passing props through every level ("prop drilling"). Perfect for things like "who is logged in" that lots of components need.</div>
+<pre><code>// 1. Create it
+const UserContext = createContext(null);
+// 2. Provide it high up (wraps the app)
+&lt;UserProvider&gt;  &lt;App /&gt;  &lt;/UserProvider&gt;
+// 3. Consume it anywhere below
+const { name, role } = useUser();   // custom hook wrapping useContext</code></pre>
+<div class="why"><strong>Today it's hardcoded</strong> (<code>name: "Sarah Johnson"</code>). In Phase 3 this becomes a real <code>AuthContext</code> that gets the logged-in user from the backend's <code>/auth/me</code> endpoint. Same pattern, real data.</div>
+
+<!-- ===================================================== -->
+<h2 id="backend">8. Backend architecture (layers)</h2>
+<p>The API is organized in <strong>layers</strong>, each with one job. A request flows down through them and the response flows back up:</p>
+<div class="mermaid">
+flowchart TB
+    R["<b>Route</b><br/>defines the URL + method<br/>GET /api/residents"] --> M["<b>Middleware</b><br/>auth · RBAC · validation · audit"]
+    M --> Co["<b>Controller</b><br/>reads the request,<br/>calls the service, sends response"]
+    Co --> S["<b>Service</b><br/>the business logic<br/>(rules, orchestration)"]
+    S --> Rep["<b>Repository</b><br/>the only layer that<br/>touches the database (Prisma)"]
+    Rep --> DB[(Postgres)]
+</div>
+<table>
+  <tr><th>Layer</th><th>Responsibility</th><th>Analogy</th></tr>
+  <tr><td>Route</td><td>"This URL + HTTP method maps to this handler."</td><td>The address on an envelope</td></tr>
+  <tr><td>Middleware</td><td>Cross-cutting checks that run before the handler (is this user allowed? is the input valid?).</td><td>Security checkpoint</td></tr>
+  <tr><td>Controller</td><td>Translates HTTP ↔ plain function calls. No business logic.</td><td>Receptionist</td></tr>
+  <tr><td>Service</td><td>The actual rules ("a task must have an assignee").</td><td>The specialist doing the work</td></tr>
+  <tr><td>Repository</td><td>Reads/writes the DB. The only layer that knows SQL/Prisma exists.</td><td>The filing clerk</td></tr>
+</table>
+<div class="why"><strong>Why layers?</strong> Each can be changed or tested independently. Swap Postgres for another DB? Only the repository changes. Change a business rule? Only the service changes. This is "separation of concerns."</div>
+
+<div class="def"><strong>Middleware</strong> = a function that sits in the request pipeline and can inspect/modify the request, then either pass it along (<code>next()</code>) or stop it (send an error). Auth, RBAC, logging, and validation are all middleware.</div>
+<pre><code>// A middleware: block the request unless logged in
+function requireAuth(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: "Not logged in" });
+  next();  // ok, continue to the next layer
+}</code></pre>
+
+<!-- ===================================================== -->
+<h2 id="db">9. Database, Prisma &amp; the ORM</h2>
+<div class="def"><strong>Relational database</strong> = data in tables (rows &amp; columns) with <em>relationships</em> between them. A resident has many progress notes → the notes table has a <code>resident_id</code> column pointing back ("foreign key").</div>
+<div class="def"><strong>ORM (Object-Relational Mapper)</strong> = a library that lets you work with database rows as normal objects in your language, instead of writing SQL strings. Prisma is our ORM.</div>
+<pre><code>// Without an ORM (raw SQL — error-prone, injection-risky):
+db.query("SELECT * FROM residents WHERE facility_id = '" + id + "'");
+
+// With Prisma (typed, safe, auto-parameterized):
+prisma.resident.findMany({ where: { facilityId: id } });</code></pre>
+<div class="why"><strong>Why an ORM matters for security.</strong> Prisma builds parameterized queries automatically, so a value like <code>'; DROP TABLE residents; --</code> is treated as plain text, not SQL. That structurally prevents <strong>SQL injection</strong> — one of the oldest, most dangerous web vulnerabilities.</div>
+
+<h4>How Prisma works</h4>
+<ol>
+  <li>You describe your tables in <code>schema.prisma</code> (one place).</li>
+  <li><code>prisma migrate</code> turns that into real SQL tables + keeps a version history (<strong>migrations</strong>).</li>
+  <li><code>prisma generate</code> creates a fully-typed client, so <code>prisma.resident.</code> autocompletes every column.</li>
+</ol>
+<pre><code>// schema.prisma — describing a table
+model Resident {
+  id         String   @id @default(uuid())
+  facilityId String
+  name       String
+  careLevel  CareLevel
+  notes      ProgressNote[]   // one resident → many notes
+  facility   Facility @relation(fields: [facilityId], references: [id])
+}</code></pre>
+<div class="def"><strong>Migration</strong> = a versioned change to the database structure. Like git commits, but for your table shapes. Lets the whole team (and production) evolve the DB safely and reproducibly.</div>
+<div class="def"><strong>Seeding</strong> = filling a fresh database with starter data. Our <code>seed.ts</code> loads the existing <code>mockData.ts</code> into Postgres — so the moment the DB exists, it already has the demo residents, and the frontend can switch over gradually.</div>
+
+<!-- ===================================================== -->
+<h2 id="api-flow">10. A request's full journey</h2>
+<p>Follow "nurse adds a progress note" all the way through:</p>
+<div class="mermaid">
+sequenceDiagram
+    participant U as User (browser)
+    participant Q as TanStack Query
+    participant API as Express API
+    participant MW as Middleware
+    participant SVC as Service/Repo
+    participant DB as Postgres
+    U->>Q: clicks "Save Note"
+    Q->>API: POST /residents/1/progress-notes {note, category}
+    API->>MW: auth → is token valid?
+    MW->>MW: RBAC → can this role create clinical?
+    MW->>MW: zod → is the body valid?
+    MW->>SVC: passes clean request
+    SVC->>DB: prisma.progressNote.create(...)
+    DB-->>SVC: new row
+    SVC->>DB: audit_log.create(...)  (who did what)
+    SVC-->>API: created note
+    API-->>Q: 201 Created + JSON
+    Q->>Q: update cache, re-render list
+    Q-->>U: new note appears instantly
+</div>
+<p>Notice how many checks happen <em>before</em> any data is written: authenticated? authorized? valid? Only then does the write happen, and it's audited. That's defense in depth.</p>
+
+<!-- ===================================================== -->
+<h2 id="auth-flow">11. Authentication flow</h2>
+<div class="def"><strong>Authentication</strong> = "who are you?" (login). <strong>Authorization</strong> = "what are you allowed to do?" (RBAC). Different questions — you're authenticated once, authorized on every action.</div>
+<div class="def"><strong>JWT (JSON Web Token)</strong> = a signed, tamper-proof string the server gives you at login that proves who you are. The server signs it with a secret key; if anyone edits it, the signature breaks and it's rejected. It's like a wristband at an event — hard to forge, checked at every door.</div>
+<div class="mermaid">
+sequenceDiagram
+    participant B as Browser
+    participant API as API
+    B->>API: POST /auth/login {email, password}
+    API->>API: bcrypt.compare(password, storedHash)
+    API-->>B: Set-Cookie: accessToken (httpOnly), refreshToken (httpOnly)
+    Note over B,API: cookie is invisible to JavaScript (XSS-safe)
+    B->>API: GET /residents (browser auto-sends cookie)
+    API->>API: verify JWT signature → identify user → RBAC check
+    API-->>B: data (or 401/403 if not allowed)
+</div>
+<ul>
+  <li><strong>bcrypt.compare</strong> — checks a password against the stored hash without ever un-hashing (hashing is one-way).</li>
+  <li><strong>httpOnly cookie</strong> — the browser stores &amp; sends it automatically, but page JavaScript cannot read it, so an XSS attack can't steal the session.</li>
+  <li><strong>access vs refresh token</strong> — the access token is short-lived (limits damage if leaked); the refresh token quietly gets a new access token so the user isn't logged out every 15 minutes.</li>
+  <li><strong>401 vs 403</strong> — 401 = "I don't know who you are" (log in); 403 = "I know you, but you're not allowed."</li>
+</ul>
+
+<!-- ===================================================== -->
+<h2 id="data-fetching">12. Data fetching (TanStack Query)</h2>
+<div class="def"><strong>TanStack Query</strong> = a library that handles the whole lifecycle of server data in React: fetching, caching, loading/error states, and re-fetching when data goes stale — so you don't hand-write all that plumbing.</div>
+<p><strong>The migration in one picture</strong> — this is the core of Phase 4:</p>
+<pre><code>// BEFORE (mock data, in-memory, lost on refresh):
+import { progressNotes } from "@/data/mockData";
+const notes = progressNotes.filter(n =&gt; n.residentId === residentId);
+
+// AFTER (real data from the API, cached, always fresh):
+const { data: notes = [], isLoading } = useProgressNotes(residentId);
+//      ↑ same shape (thanks to shared types) — the JSX barely changes</code></pre>
+<pre><code>// The hook (in services/), reused by any component:
+function useProgressNotes(residentId) {
+  return useQuery({
+    queryKey: ["progress-notes", residentId],       // cache identity
+    queryFn: () =&gt; api.get(`/residents/${residentId}/progress-notes`),
+  });
+}
+// Writing data:
+const createNote = useMutation({
+  mutationFn: (body) =&gt; api.post(`/residents/${id}/progress-notes`, body),
+  onSuccess: () =&gt; queryClient.invalidateQueries(["progress-notes", id]),
+  //                 ↑ tells the cache "this data changed, re-fetch it"
+});</code></pre>
+<div class="def"><strong>queryKey</strong> = a unique label for a piece of cached data. <strong>Invalidation</strong> = marking cached data as stale so it re-fetches — that's how a newly-added note appears immediately without a manual refresh.</div>
+<div class="why"><strong>Strangler-fig migration.</strong> Because shared types keep the <em>shape</em> identical, we migrate one resource at a time. Un-migrated components keep reading <code>mockData.ts</code>; migrated ones hit the API. The app never fully breaks during the transition. (Named after a vine that gradually replaces the tree it grows on.)</div>
+
+<!-- ===================================================== -->
+<h2 id="validation">13. Validation with zod</h2>
+<div class="def"><strong>Schema validation</strong> = defining the exact shape data must have, and rejecting anything that doesn't fit — <em>before</em> it reaches your logic or database.</div>
+<pre><code>const createTaskSchema = z.object({
+  title:      z.string().min(1, "Task description is required"),
+  assignedTo: z.string().min(1),
+  priority:   z.enum(["Low", "Medium", "High", "Urgent"]),
+  dueDate:    z.string().optional(),
+});
+type CreateTaskInput = z.infer&lt;typeof createTaskSchema&gt;;  // free TypeScript type!</code></pre>
+<div class="why"><strong>One schema, two jobs.</strong> The <em>same</em> zod schema lives in <code>packages/shared</code> and is used by (1) the <strong>frontend form</strong> (via react-hook-form) to show inline errors as the user types, and (2) the <strong>backend</strong> to reject bad/malicious requests. Rules can never drift out of sync, and <code>z.infer</code> gives you the TypeScript type for free.</div>
+
+<!-- ===================================================== -->
+<h2 id="glossary">14. Glossary of every term</h2>
+<table>
+  <tr><th>Term</th><th>One-line meaning</th></tr>
+  <tr><td>API</td><td>The set of URLs the backend exposes for the frontend to call.</td></tr>
+  <tr><td>Endpoint</td><td>One specific URL + method, e.g. <code>POST /api/tasks</code>.</td></tr>
+  <tr><td>REST</td><td>A convention for designing endpoints around resources (GET reads, POST creates, PUT/PATCH updates, DELETE removes).</td></tr>
+  <tr><td>HTTP method</td><td>The verb of a request: GET, POST, PUT, PATCH, DELETE.</td></tr>
+  <tr><td>Status code</td><td>The result number: 200 ok, 201 created, 400 bad input, 401 not logged in, 403 forbidden, 404 not found, 500 server error.</td></tr>
+  <tr><td>JSON</td><td>The text format used to send data between frontend and backend.</td></tr>
+  <tr><td>Payload / body</td><td>The data sent with a request (e.g. the new note's fields).</td></tr>
+  <tr><td>Component</td><td>A reusable piece of UI (a function returning JSX).</td></tr>
+  <tr><td>Props</td><td>Inputs passed into a component.</td></tr>
+  <tr><td>State</td><td>Data a component remembers and re-renders on.</td></tr>
+  <tr><td>Hook</td><td>A <code>use…</code> function that adds React powers or shared logic.</td></tr>
+  <tr><td>Context</td><td>App-wide shared data without prop drilling.</td></tr>
+  <tr><td>Route</td><td>A URL-to-component mapping.</td></tr>
+  <tr><td>SPA</td><td>Single-Page App — swaps views without full page reloads.</td></tr>
+  <tr><td>Middleware</td><td>A function in the request pipeline (auth, validation, logging).</td></tr>
+  <tr><td>Controller / Service / Repository</td><td>Backend layers: HTTP glue / business rules / DB access.</td></tr>
+  <tr><td>ORM</td><td>Query the DB with typed objects instead of raw SQL (Prisma).</td></tr>
+  <tr><td>Migration</td><td>A versioned change to the DB structure.</td></tr>
+  <tr><td>Seed</td><td>Load starter data into a fresh DB.</td></tr>
+  <tr><td>Foreign key</td><td>A column pointing to a row in another table (the relationship).</td></tr>
+  <tr><td>Primary key</td><td>The unique id of a row (we use UUIDs).</td></tr>
+  <tr><td>Authentication</td><td>Proving who you are (login).</td></tr>
+  <tr><td>Authorization / RBAC</td><td>Deciding what you're allowed to do, by role.</td></tr>
+  <tr><td>JWT</td><td>A signed token proving your identity on each request.</td></tr>
+  <tr><td>bcrypt</td><td>A slow, salted password-hashing algorithm.</td></tr>
+  <tr><td>Multi-tenancy</td><td>One app instance serving many isolated organizations (facilities).</td></tr>
+  <tr><td>Audit log</td><td>An append-only record of who did what, when.</td></tr>
+  <tr><td>CORS</td><td>Browser rule controlling which sites may call your API.</td></tr>
+  <tr><td>Environment variable</td><td>A config value (like a secret) kept outside the code.</td></tr>
+  <tr><td>Cache</td><td>Kept-nearby copy of data to avoid re-fetching.</td></tr>
+  <tr><td>Invalidation</td><td>Marking cached data stale so it re-fetches.</td></tr>
+  <tr><td>pgvector / embedding</td><td>Storing text as numbers so you can search by meaning (for AI).</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="build-it">15. Build it yourself: the checklist</h2>
+<p>If you wanted to recreate this from scratch, this is the order that keeps you sane:</p>
+<ol>
+  <li><strong>Scaffold the frontend</strong> — <code>npm create vite@latest</code> (React + TS). Add Tailwind + a couple of shadcn components. Build one static page.</li>
+  <li><strong>Add routing</strong> — install React Router, make 2–3 pages navigate.</li>
+  <li><strong>Build the UI with fake data</strong> — a <code>mockData.ts</code> file. Get the whole app <em>looking</em> right before any backend. (This is exactly where the project started.)</li>
+  <li><strong>Go monorepo</strong> — npm workspaces; extract shared types into <code>packages/shared</code>.</li>
+  <li><strong>Stand up Postgres</strong> — locally via Docker; define <code>schema.prisma</code>; <code>migrate</code> + <code>seed</code> from your mock data.</li>
+  <li><strong>Build the API</strong> — Express with the layer structure; one resource end-to-end first (residents), then copy the pattern.</li>
+  <li><strong>Add auth</strong> — login endpoint, bcrypt, JWT cookies, a ProtectedRoute on the frontend.</li>
+  <li><strong>Wire the frontend to the API</strong> — TanStack Query; migrate one resource at a time; delete mock arrays as you go.</li>
+  <li><strong>Harden</strong> — validation everywhere, RBAC, audit log, security headers, env validation.</li>
+  <li><strong>Ship</strong> — CI (lint+test+build), deploy frontend static + backend + managed Postgres.</li>
+</ol>
+<div class="try"><strong>Learning tip.</strong> Don't try to hold it all at once. The one idea that unlocks everything: <em>the browser asks, the server decides, the database remembers.</em> Every feature — notes, tasks, login, AI — is just another trip around that loop. Master one full loop (e.g. progress notes) and the other 20 are copies of it.</div>
+
+<hr>
+<p class="meta">Pair this with <strong>01-security-and-scope.html</strong> for the requirements + security + DB-design view. Both are living documents — update them as the code evolves.</p>
+
+</div>
+</body>
+</html>
