@@ -34,6 +34,11 @@ export default function CardsTab({ resident }: CardsTabProps) {
         </Button>
       </div>
 
+      {cards.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">
+          No cards on file.
+        </p>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {cards.map((card) => {
           const verified = card.status === "Active" || card.status === "Verified";
@@ -74,6 +79,7 @@ export default function CardsTab({ resident }: CardsTabProps) {
           );
         })}
       </div>
+      )}
 
       {anacc && (
         <div className="border rounded-lg p-4">

@@ -598,34 +598,6 @@ export const forms = [
   "Pain – Modified Resident's Verbal Brief Pain Inventory (MRBVPI)",
 ];
 
-export const carePlanTypes = [
-  "Behaviour Support Care Plan",
-  "Body Care and Personal Hygiene",
-  "Clinical Risk",
-  "Communication and Language",
-  "Continence – Bladder and Bowel Management",
-  "Continence – Toileting",
-  "Cultural and Spiritual Care",
-  "Emotion Support",
-  "Fall Risk Management",
-  "Food, Nutrition and Dining Experience",
-  "Infection Prevention Control and Vaccination",
-  "Intimacy & Trust – Support and Enablement",
-  "Lifestyle & Leisure",
-  "Medication",
-  "Oral and Dental",
-  "Pain Management",
-  "Personal Hygiene and Grooming",
-  "Physiotherapy",
-  "Risk",
-  "Risk – Self-Harm/Suicide",
-  "Sensory – Smell, Taste & Touch",
-  "Skin Care",
-  "Sleep and Settling",
-  "Specialised Nursing – Weight",
-  "Wellbeing",
-];
-
 export const movementTypes = [
   "New Resident",
   "Admission",
@@ -649,25 +621,6 @@ export const movementTypes = [
   "Change room",
   "Change Admission Date",
   "Change Discharge Date",
-];
-
-export const documentCategories = [
-  "Advanced Care Plan",
-  "Allied Health Related",
-  "Appointments and Referrals",
-  "Assessments",
-  "Care Plan Consultation",
-  "Communication with Resident/NOK",
-  "Contract",
-  "Discharge Summary",
-  "Documents",
-  "Funding Related",
-  "Lee Care documents",
-  "Palliative Care",
-  "Pathology",
-  "Pharmacy",
-  "Resident Documents",
-  "Vaccination records",
 ];
 
 export interface FacilityDocument {
@@ -775,6 +728,15 @@ export const residentDoctors: ResidentDoctor[] = [
   { id: "doc3", residentId: "1", name: "Dr. Emma Wilson", specialty: "General Practice", facility: "Community Health Clinic", phone: "02 9123 2211", email: "e.wilson@chc.com.au", primary: false },
   { id: "doc4", residentId: "1", name: "Dr. James Patterson", specialty: "Cardiology", facility: "Heart Health Centre", phone: "02 9123 5544", email: "j.patterson@hhc.com.au", primary: false },
   { id: "doc5", residentId: "1", name: "Dr. Lisa Wong", specialty: "Psychiatry", facility: "Mind & Wellness Clinic", phone: "02 9123 7733", email: "l.wong@mindwellness.com.au", primary: false },
+  { id: "doc6", residentId: "2", name: "Dr. Patel", specialty: "General Practice", facility: "Riverside Medical Centre", phone: "02 9124 1010", email: "r.patel@riverside.com.au", primary: true },
+  { id: "doc7", residentId: "2", name: "Dr. Michael Chen", specialty: "Respiratory Medicine", facility: "Elder Care Specialists", phone: "02 9123 8899", email: "m.chen@eldercare.com.au", primary: false },
+  { id: "doc8", residentId: "3", name: "Dr. Johnson", specialty: "General Practice", facility: "Community Health Clinic", phone: "02 9124 2020", email: "l.johnson@chc.com.au", primary: true },
+  { id: "doc9", residentId: "3", name: "Dr. Lisa Wong", specialty: "Psychiatry", facility: "Mind & Wellness Clinic", phone: "02 9123 7733", email: "l.wong@mindwellness.com.au", primary: false },
+  { id: "doc10", residentId: "4", name: "Dr. Smith", specialty: "General Practice", facility: "Sunrise Medical Centre", phone: "02 9123 4567", email: "j.smith@medical.com.au", primary: true },
+  { id: "doc11", residentId: "4", name: "Dr. James Patterson", specialty: "Cardiology", facility: "Heart Health Centre", phone: "02 9123 5544", email: "j.patterson@hhc.com.au", primary: false },
+  { id: "doc12", residentId: "4", name: "Dr. Priya Nair", specialty: "Nephrology", facility: "Kidney Care Centre", phone: "02 9124 3030", email: "p.nair@kidneycare.com.au", primary: false },
+  { id: "doc13", residentId: "5", name: "Dr. Lee", specialty: "General Practice", facility: "Riverside Medical Centre", phone: "02 9124 4040", email: "s.lee@riverside.com.au", primary: true },
+  { id: "doc14", residentId: "5", name: "Dr. Michael Chen", specialty: "Geriatrics", facility: "Elder Care Specialists", phone: "02 9123 8899", email: "m.chen@eldercare.com.au", primary: false },
 ];
 
 export interface ResidentContact {
@@ -790,6 +752,11 @@ export interface ResidentContact {
 export const residentContacts: ResidentContact[] = [
   { id: "con1", residentId: "1", name: "John Thompson", relationship: "Son", phone: "0412 345 678", email: "john.t@email.com", primary: true },
   { id: "con2", residentId: "1", name: "Mary Thompson", relationship: "Daughter-in-law", phone: "0412 345 679", email: "mary.t@email.com", primary: false },
+  { id: "con3", residentId: "2", name: "Susan Jenkins", relationship: "Wife", phone: "0412 345 680", email: "susan.j@email.com", primary: true },
+  { id: "con4", residentId: "3", name: "Peter Williams", relationship: "Son", phone: "0412 345 681", email: "peter.w@email.com", primary: true },
+  { id: "con5", residentId: "3", name: "Anna Williams", relationship: "Daughter", phone: "0412 345 682", email: "anna.w@email.com", primary: false },
+  { id: "con6", residentId: "4", name: "Mary Brown", relationship: "Wife", phone: "0412 345 683", email: "mary.b@email.com", primary: true },
+  { id: "con7", residentId: "5", name: "Tom Davis", relationship: "Son", phone: "0412 345 684", email: "tom.d@email.com", primary: true },
 ];
 
 export interface ResidentCardRecord {
@@ -806,6 +773,22 @@ export const residentCards: ResidentCardRecord[] = [
   { id: "card2", residentId: "1", type: "IHI Card", number: "8003 6080 0012 3456", status: "Verified" },
   { id: "card3", residentId: "1", type: "Concession Card", number: "Not Provided", status: "Pending" },
   { id: "card4", residentId: "1", type: "DVA Card", number: "Not Applicable", status: "N/A" },
+  { id: "card5", residentId: "2", type: "Medicare Card", number: "3456 78901 2", status: "Active", detail: "Expires: 03/2027" },
+  { id: "card6", residentId: "2", type: "IHI Card", number: "8003 6080 0034 5678", status: "Verified" },
+  { id: "card7", residentId: "2", type: "Concession Card", number: "DEF456", status: "Active" },
+  { id: "card8", residentId: "2", type: "DVA Card", number: "Not Applicable", status: "N/A" },
+  { id: "card9", residentId: "3", type: "Medicare Card", number: "4567 89012 3", status: "Active", detail: "Expires: 07/2026" },
+  { id: "card10", residentId: "3", type: "IHI Card", number: "8003 6080 0045 6789", status: "Pending" },
+  { id: "card11", residentId: "3", type: "Concession Card", number: "GHI789", status: "Active" },
+  { id: "card12", residentId: "3", type: "DVA Card", number: "Not Applicable", status: "N/A" },
+  { id: "card13", residentId: "4", type: "Medicare Card", number: "5678 90123 4", status: "Active", detail: "Expires: 11/2026" },
+  { id: "card14", residentId: "4", type: "IHI Card", number: "8003 6080 0056 7890", status: "Verified" },
+  { id: "card15", residentId: "4", type: "Concession Card", number: "JKL012", status: "Active" },
+  { id: "card16", residentId: "4", type: "DVA Card", number: "DVA2234567", status: "Active" },
+  { id: "card17", residentId: "5", type: "Medicare Card", number: "6789 01234 5", status: "Active", detail: "Expires: 09/2026" },
+  { id: "card18", residentId: "5", type: "IHI Card", number: "8003 6080 0067 8901", status: "Verified" },
+  { id: "card19", residentId: "5", type: "Concession Card", number: "MNO345", status: "Active" },
+  { id: "card20", residentId: "5", type: "DVA Card", number: "Not Applicable", status: "N/A" },
 ];
 
 export interface VitalReading {
@@ -826,6 +809,18 @@ export const vitalReadings: VitalReading[] = [
   { id: "vr4", residentId: "1", date: "Jan 13", systolic: 132, diastolic: 81, pulse: 75, temperature: 36.8, spo2: 96 },
   { id: "vr5", residentId: "1", date: "Jan 14", systolic: 127, diastolic: 78, pulse: 73, temperature: 36.6, spo2: 97 },
   { id: "vr6", residentId: "1", date: "Jan 15", systolic: 124, diastolic: 82, pulse: 72, temperature: 36.6, spo2: 97 },
+  { id: "vr7", residentId: "2", date: "Jan 10", systolic: 118, diastolic: 74, pulse: 80, temperature: 36.9, spo2: 94 },
+  { id: "vr8", residentId: "2", date: "Jan 11", systolic: 120, diastolic: 76, pulse: 82, temperature: 37.0, spo2: 94 },
+  { id: "vr9", residentId: "2", date: "Jan 12", systolic: 116, diastolic: 72, pulse: 78, temperature: 36.8, spo2: 95 },
+  { id: "vr10", residentId: "3", date: "Jan 10", systolic: 134, diastolic: 84, pulse: 68, temperature: 36.5, spo2: 97 },
+  { id: "vr11", residentId: "3", date: "Jan 11", systolic: 136, diastolic: 86, pulse: 70, temperature: 36.6, spo2: 96 },
+  { id: "vr12", residentId: "3", date: "Jan 12", systolic: 130, diastolic: 82, pulse: 67, temperature: 36.4, spo2: 97 },
+  { id: "vr13", residentId: "4", date: "Jan 10", systolic: 140, diastolic: 88, pulse: 84, temperature: 36.7, spo2: 93 },
+  { id: "vr14", residentId: "4", date: "Jan 11", systolic: 142, diastolic: 90, pulse: 86, temperature: 36.8, spo2: 92 },
+  { id: "vr15", residentId: "4", date: "Jan 12", systolic: 138, diastolic: 87, pulse: 83, temperature: 36.6, spo2: 93 },
+  { id: "vr16", residentId: "5", date: "Jan 10", systolic: 122, diastolic: 76, pulse: 70, temperature: 36.5, spo2: 96 },
+  { id: "vr17", residentId: "5", date: "Jan 11", systolic: 124, diastolic: 78, pulse: 72, temperature: 36.6, spo2: 96 },
+  { id: "vr18", residentId: "5", date: "Jan 12", systolic: 120, diastolic: 75, pulse: 69, temperature: 36.4, spo2: 97 },
 ];
 
 export interface WeightPoint {
@@ -839,6 +834,18 @@ export const weightReadings: WeightPoint[] = [
   { id: "wp1", residentId: "1", week: "Week 1", value: 62.5 },
   { id: "wp2", residentId: "1", week: "Week 2", value: 62.0 },
   { id: "wp3", residentId: "1", week: "Week 3", value: 62.8 },
+  { id: "wp4", residentId: "2", week: "Week 1", value: 78.2 },
+  { id: "wp5", residentId: "2", week: "Week 2", value: 77.6 },
+  { id: "wp6", residentId: "2", week: "Week 3", value: 77.9 },
+  { id: "wp7", residentId: "3", week: "Week 1", value: 58.4 },
+  { id: "wp8", residentId: "3", week: "Week 2", value: 57.9 },
+  { id: "wp9", residentId: "3", week: "Week 3", value: 58.1 },
+  { id: "wp10", residentId: "4", week: "Week 1", value: 84.0 },
+  { id: "wp11", residentId: "4", week: "Week 2", value: 83.2 },
+  { id: "wp12", residentId: "4", week: "Week 3", value: 82.7 },
+  { id: "wp13", residentId: "5", week: "Week 1", value: 55.6 },
+  { id: "wp14", residentId: "5", week: "Week 2", value: 55.8 },
+  { id: "wp15", residentId: "5", week: "Week 3", value: 56.0 },
 ];
 
 export interface ChartBglPoint {
@@ -854,6 +861,11 @@ export const chartBglReadings: ChartBglPoint[] = [
   { id: "cb3", residentId: "1", date: "Jan 12", value: 6.5 },
   { id: "cb4", residentId: "1", date: "Jan 13", value: 7.5 },
   { id: "cb5", residentId: "1", date: "Jan 14", value: 6.9 },
+  { id: "cb6", residentId: "4", date: "Jan 10", value: 9.4 },
+  { id: "cb7", residentId: "4", date: "Jan 11", value: 8.1 },
+  { id: "cb8", residentId: "4", date: "Jan 12", value: 10.6 },
+  { id: "cb9", residentId: "4", date: "Jan 13", value: 8.8 },
+  { id: "cb10", residentId: "4", date: "Jan 14", value: 9.0 },
 ];
 
 export interface BehaviorPoint {
@@ -869,6 +881,18 @@ export const behaviorReadings: BehaviorPoint[] = [
   { id: "bh3", residentId: "1", date: "Jan 12", incidents: 0 },
   { id: "bh4", residentId: "1", date: "Jan 13", incidents: 2 },
   { id: "bh5", residentId: "1", date: "Jan 14", incidents: 0 },
+  { id: "bh6", residentId: "2", date: "Jan 10", incidents: 0 },
+  { id: "bh7", residentId: "2", date: "Jan 11", incidents: 0 },
+  { id: "bh8", residentId: "2", date: "Jan 12", incidents: 1 },
+  { id: "bh9", residentId: "3", date: "Jan 10", incidents: 1 },
+  { id: "bh10", residentId: "3", date: "Jan 11", incidents: 2 },
+  { id: "bh11", residentId: "3", date: "Jan 12", incidents: 1 },
+  { id: "bh12", residentId: "4", date: "Jan 10", incidents: 0 },
+  { id: "bh13", residentId: "4", date: "Jan 11", incidents: 1 },
+  { id: "bh14", residentId: "4", date: "Jan 12", incidents: 0 },
+  { id: "bh15", residentId: "5", date: "Jan 10", incidents: 1 },
+  { id: "bh16", residentId: "5", date: "Jan 11", incidents: 0 },
+  { id: "bh17", residentId: "5", date: "Jan 12", incidents: 0 },
 ];
 
 export interface CarePathway {
@@ -886,6 +910,16 @@ export const carePathways: CarePathway[] = [
   { id: "path3", residentId: "1", name: "Hospital Discharge Pathway", totalSteps: 6, completedSteps: 4, status: "In Progress" },
   { id: "path4", residentId: "1", name: "Palliative Care Pathway", totalSteps: 10, completedSteps: 0, status: "Not Started" },
   { id: "path5", residentId: "1", name: "Respite Care Pathway", totalSteps: 5, completedSteps: 0, status: "Not Started" },
+  { id: "path6", residentId: "2", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
+  { id: "path7", residentId: "2", name: "Respiratory Care Pathway", totalSteps: 7, completedSteps: 3, status: "In Progress" },
+  { id: "path8", residentId: "3", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
+  { id: "path9", residentId: "3", name: "Respite Care Pathway", totalSteps: 5, completedSteps: 5, status: "Completed" },
+  { id: "path10", residentId: "3", name: "Mental Health Care Pathway", totalSteps: 9, completedSteps: 2, status: "In Progress" },
+  { id: "path11", residentId: "4", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
+  { id: "path12", residentId: "4", name: "Chronic Disease Management Pathway", totalSteps: 10, completedSteps: 6, status: "In Progress" },
+  { id: "path13", residentId: "4", name: "Hospital Discharge Pathway", totalSteps: 6, completedSteps: 6, status: "Completed" },
+  { id: "path14", residentId: "5", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
+  { id: "path15", residentId: "5", name: "Dementia Care Pathway", totalSteps: 11, completedSteps: 5, status: "In Progress" },
 ];
 
 export interface AssessmentRecord {
@@ -902,6 +936,14 @@ export interface AssessmentRecord {
 export const assessmentRecords: AssessmentRecord[] = [
   { id: "asmt1", residentId: "1", name: "Cognitive Assessment", date: "10/01/2024", by: "Dr. Sarah Mitchell", score: 18, summary: "MMSE score indicates moderate cognitive impairment. Continue current care plan.", status: "Completed" },
   { id: "asmt2", residentId: "1", name: "Fall Risk Assessment", date: "12/01/2024", by: "Sarah Johnson", score: 15, summary: "High fall risk. Ensure mobility aids are within reach at all times.", status: "Completed" },
+  { id: "asmt3", residentId: "2", name: "Nutrition Assessment", date: "08/01/2024", by: "Dr. Patel", score: 12, summary: "COPD affecting appetite. Small frequent meals recommended.", status: "Completed" },
+  { id: "asmt4", residentId: "2", name: "Fall Risk Assessment", date: "20/01/2024", by: "Sarah Johnson", score: 8, summary: "Low fall risk. Resident mobile and independent.", status: "Completed" },
+  { id: "asmt5", residentId: "3", name: "Cognitive Assessment", date: "05/01/2024", by: "Dr. Johnson", score: 22, summary: "MMSE within normal range. Depression symptoms monitored.", status: "Completed" },
+  { id: "asmt6", residentId: "3", name: "Behaviour Assessment", date: "18/01/2024", by: "Sarah Jones EN", score: 6, summary: "Occasional low mood episodes. Social engagement encouraged.", status: "Completed" },
+  { id: "asmt7", residentId: "4", name: "Skin Integrity Assessment", date: "14/01/2024", by: "Sarah Johnson", score: 14, summary: "Pressure injury risk elevated due to reduced mobility. Repositioning schedule in place.", status: "Completed" },
+  { id: "asmt8", residentId: "4", name: "Pain Assessment", date: "22/01/2024", by: "Dr. Smith", score: 3, summary: "Mild pain reported, well controlled with current regimen.", status: "Completed" },
+  { id: "asmt9", residentId: "5", name: "Cognitive Assessment", date: "11/01/2024", by: "Dr. Lee", score: 14, summary: "MMSE indicates moderate-severe cognitive impairment consistent with Alzheimer's diagnosis.", status: "Completed" },
+  { id: "asmt10", residentId: "5", name: "Fall Risk Assessment", date: "25/01/2024", by: "Michael Roberts", score: 17, summary: "High fall risk following prior hip fracture. Hip protectors in use.", status: "Completed" },
 ];
 
 export const assessmentTypeOptions = [
@@ -940,6 +982,70 @@ export const anaccDetails: AnaccDetail[] = [
       { label: "Healthcare", score: 4, outOf: 5 },
     ],
     ihiNumber: "8003 6080 0012 3456",
+    ihiVerified: true,
+  },
+  {
+    residentId: "2",
+    fundingClass: "Class 4",
+    fundingLevel: "Low",
+    dailyRate: "$145.20",
+    assessmentDate: "12/11/2023",
+    nextReview: "12/02/2024",
+    domainScores: [
+      { label: "Cognition & Behaviour", score: 1, outOf: 5 },
+      { label: "Mobility", score: 2, outOf: 5 },
+      { label: "Personal Care", score: 2, outOf: 5 },
+      { label: "Healthcare", score: 3, outOf: 5 },
+    ],
+    ihiNumber: "8003 6080 0034 5678",
+    ihiVerified: true,
+  },
+  {
+    residentId: "3",
+    fundingClass: "Class 7",
+    fundingLevel: "Medium",
+    dailyRate: "$205.80",
+    assessmentDate: "03/10/2023",
+    nextReview: "03/01/2024",
+    domainScores: [
+      { label: "Cognition & Behaviour", score: 3, outOf: 5 },
+      { label: "Mobility", score: 2, outOf: 5 },
+      { label: "Personal Care", score: 3, outOf: 5 },
+      { label: "Healthcare", score: 3, outOf: 5 },
+    ],
+    ihiNumber: "8003 6080 0045 6789",
+    ihiVerified: false,
+  },
+  {
+    residentId: "4",
+    fundingClass: "Class 11",
+    fundingLevel: "High",
+    dailyRate: "$298.90",
+    assessmentDate: "18/12/2023",
+    nextReview: "18/03/2024",
+    domainScores: [
+      { label: "Cognition & Behaviour", score: 2, outOf: 5 },
+      { label: "Mobility", score: 4, outOf: 5 },
+      { label: "Personal Care", score: 4, outOf: 5 },
+      { label: "Healthcare", score: 5, outOf: 5 },
+    ],
+    ihiNumber: "8003 6080 0056 7890",
+    ihiVerified: true,
+  },
+  {
+    residentId: "5",
+    fundingClass: "Class 8",
+    fundingLevel: "Medium",
+    dailyRate: "$218.40",
+    assessmentDate: "22/09/2023",
+    nextReview: "22/12/2023",
+    domainScores: [
+      { label: "Cognition & Behaviour", score: 4, outOf: 5 },
+      { label: "Mobility", score: 3, outOf: 5 },
+      { label: "Personal Care", score: 3, outOf: 5 },
+      { label: "Healthcare", score: 3, outOf: 5 },
+    ],
+    ihiNumber: "8003 6080 0067 8901",
     ihiVerified: true,
   },
 ];
@@ -990,4 +1096,13 @@ export const residentDocuments: ResidentDocumentRecord[] = [
   { id: "rd1", residentId: "1", name: "Admission Documentation", category: "Admission", size: "2.4 MB", uploadDate: "15/05/2023" },
   { id: "rd2", residentId: "1", name: "Advanced Care Directive", category: "Legal", size: "1.1 MB", uploadDate: "20/05/2023" },
   { id: "rd3", residentId: "1", name: "Medication Chart", category: "Clinical", size: "890 KB", uploadDate: "01/01/2024" },
+  { id: "rd4", residentId: "2", name: "Admission Documentation", category: "Admission", size: "2.1 MB", uploadDate: "10/03/2024" },
+  { id: "rd5", residentId: "2", name: "Respiratory Care Plan", category: "Clinical", size: "760 KB", uploadDate: "05/01/2024" },
+  { id: "rd6", residentId: "3", name: "Admission Documentation", category: "Admission", size: "1.9 MB", uploadDate: "20/11/2023" },
+  { id: "rd7", residentId: "3", name: "Respite Agreement", category: "Legal", size: "540 KB", uploadDate: "20/11/2023" },
+  { id: "rd8", residentId: "4", name: "Admission Documentation", category: "Admission", size: "2.3 MB", uploadDate: "10/01/2025" },
+  { id: "rd9", residentId: "4", name: "Advanced Care Directive", category: "Legal", size: "1.0 MB", uploadDate: "12/01/2025" },
+  { id: "rd10", residentId: "4", name: "Renal Care Plan", category: "Clinical", size: "820 KB", uploadDate: "18/01/2025" },
+  { id: "rd11", residentId: "5", name: "Admission Documentation", category: "Admission", size: "2.0 MB", uploadDate: "05/06/2024" },
+  { id: "rd12", residentId: "5", name: "Advanced Care Directive", category: "Legal", size: "980 KB", uploadDate: "08/06/2024" },
 ];
