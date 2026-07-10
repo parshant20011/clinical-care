@@ -1,125 +1,67 @@
-export interface Resident {
-  id: string;
-  name: string;
-  preferredName?: string;
-  room: string;
-  doa: string; // date of admission
-  age: number;
-  gender: string;
-  status: "Permanent" | "Respite";
-  respite: boolean;
-  onLeave: boolean;
-  acdp: boolean;
-  cpr: boolean;
-  bgl: boolean;
-  mobile: boolean;
-  ihi: string;
-  anAcc: string;
-  task: number;
-  alert: boolean;
-  doctor: string;
-  medicareCard: string;
-  concessionNumber: string;
-  nok: string;
-  residence: string;
-  urn: string;
-  diagnosis: string;
-  allergies: { type: string; description: string; severity: string }[];
-  photo?: string;
-  // Facility-wide list/dashboard fields — distinct from `status` (which is
-  // Permanent/Respite residency type, used on the profile page).
-  careLevel: "Low" | "Medium" | "High";
-  accountStatus: "Active" | "Inactive";
-  nationality?: string;
-}
+// Mock data for the Clinical Care web app.
+//
+// Entity TYPES now live in @clinical/shared (single source of truth across the
+// monorepo). This file keeps only the mock DATA arrays; during the Phase 4
+// data-layer migration these arrays are replaced resource-by-resource with API
+// calls, and this file is deleted once no component imports from it.
+import type {
+  Resident,
+  ProgressNote,
+  Task,
+  Checklist,
+  CarePlan,
+  Wound,
+  Movement,
+  FacilityDocument,
+  StaffUser,
+  AppNotification,
+  ActivityItem,
+  WeeklyActivityPoint,
+  ResidentDoctor,
+  ResidentContact,
+  ResidentCardRecord,
+  VitalReading,
+  WeightPoint,
+  ChartBglPoint,
+  BehaviorPoint,
+  CarePathway,
+  AssessmentRecord,
+  AnaccDetail,
+  CarePlanCategory,
+  ClinicalForm,
+  ResidentDocumentRecord,
+} from "@clinical/shared";
 
-export interface ProgressNote {
-  id: string;
-  residentId: string;
-  date: string;
-  time: string;
-  category: "clinical" | "personal care" | "behaviour" | "incident";
-  note: string;
-  author: string;
-}
-
-export interface Task {
-  id: string;
-  residentId: string;
-  residentName: string;
-  title: string;
-  assignedTo: string;
-  area: string;
-  status: "pending" | "in_progress" | "completed" | "overdue";
-  dueDate: string;
-  notes?: string;
-  priority: "Low" | "Medium" | "High" | "Urgent";
-  createdBy: string;
-}
-
-export interface ChecklistItem {
-  id: string;
-  name: string;
-  completed: boolean;
-  completedBy?: string;
-  completedAt?: string;
-  comments?: string;
-}
-
-export interface Checklist {
-  id: string;
-  residentId: string;
-  type:
-    | "Acute Respiration Infection"
-    | "Behaviour of Concerns Incident Checklist"
-    | "New Admission Checklist"
-    | "Post Fall Incidents Checklist"
-    | "Return from Hospital"
-    | "Room Change Checklist"
-    | "Skin Integrity Incident Checklist";
-  date: string;
-  items: ChecklistItem[];
-  completedBy?: string;
-}
-
-export interface CarePlan {
-  id: string;
-  residentId: string;
-  type: string;
-  observations: string;
-  goals: string;
-  interventions: string;
-  reviewDate: string;
-  createdBy: string;
-  createdAt: string;
-  status: "active" | "archived";
-}
-
-export interface Wound {
-  id: string;
-  residentId: string;
-  startedDate: string;
-  onAdmission: boolean;
-  woundType: string;
-  location: string;
-  dressingProduct: string;
-  nextDressing: string;
-  lastReview: string;
-  nextReview: string;
-  status: "active" | "healing" | "healed" | "archived";
-  lastPhoto?: string;
-}
-
-export interface Movement {
-  id: string;
-  residentId: string;
-  date: string;
-  time: string;
-  type: string;
-  note: string;
-  recordedBy: string;
-}
-
+// Re-export the shared types so existing `import { X, type Y } from "@/data/mockData"`
+// statements across the app keep working unchanged during the migration.
+export type {
+  Resident,
+  ProgressNote,
+  Task,
+  ChecklistItem,
+  Checklist,
+  CarePlan,
+  Wound,
+  Movement,
+  FacilityDocument,
+  StaffUser,
+  AppNotification,
+  ActivityItem,
+  WeeklyActivityPoint,
+  ResidentDoctor,
+  ResidentContact,
+  ResidentCardRecord,
+  VitalReading,
+  WeightPoint,
+  ChartBglPoint,
+  BehaviorPoint,
+  CarePathway,
+  AssessmentRecord,
+  AnaccDetail,
+  CarePlanCategory,
+  ClinicalForm,
+  ResidentDocumentRecord,
+} from "@clinical/shared";
 export const residents: Resident[] = [
   {
     id: "1",
@@ -623,16 +565,6 @@ export const movementTypes = [
   "Change Discharge Date",
 ];
 
-export interface FacilityDocument {
-  id: string;
-  name: string;
-  category: string;
-  type: "PDF" | "Word" | "Excel" | "Image";
-  size: string;
-  uploadDate: string;
-  uploadedBy: string;
-}
-
 export const facilityDocuments: FacilityDocument[] = [
   { id: "d1", name: "Admission Documentation", category: "Admission", type: "PDF", size: "2.4 MB", uploadDate: "2023-05-15", uploadedBy: "Admin" },
   { id: "d2", name: "Advanced Care Directive", category: "Legal", type: "PDF", size: "1.1 MB", uploadDate: "2023-05-20", uploadedBy: "Admin" },
@@ -641,14 +573,6 @@ export const facilityDocuments: FacilityDocument[] = [
   { id: "d5", name: "Staff Training Guide", category: "Training", type: "Word", size: "3.8 MB", uploadDate: "2024-01-10", uploadedBy: "Care Manager" },
   { id: "d6", name: "Emergency Procedures", category: "Policy", type: "PDF", size: "1.5 MB", uploadDate: "2024-01-02", uploadedBy: "Admin" },
 ];
-
-export interface StaffUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  shift: "Morning" | "Afternoon" | "Night";
-}
 
 export const staffUsers: StaffUser[] = [
   { id: "u1", name: "Sarah Johnson", email: "s.johnson@care.com", role: "Registered Nurse", shift: "Morning" },
@@ -660,25 +584,11 @@ export const staffUsers: StaffUser[] = [
   { id: "u7", name: "Lisa Brown", email: "l.brown@care.com", role: "Admin", shift: "Morning" },
 ];
 
-export interface AppNotification {
-  id: string;
-  title: string;
-  timeAgo: string;
-}
-
 export const appNotifications: AppNotification[] = [
   { id: "n1", title: "New task assigned: Medication Review", timeAgo: "5 min ago" },
   { id: "n2", title: "Assessment due for Margaret Thompson", timeAgo: "1 hour ago" },
   { id: "n3", title: "Wound dressing change required - Room 108", timeAgo: "2 hours ago" },
 ];
-
-export interface ActivityItem {
-  id: string;
-  kind: "note" | "task" | "alert" | "assessment" | "careplan";
-  title: string;
-  author: string;
-  timeAgo: string;
-}
 
 export const recentActivity: ActivityItem[] = [
   { id: "act1", kind: "note", title: "Progress note added for Margaret Thompson", author: "Sarah Johnson", timeAgo: "5 minutes ago" },
@@ -687,13 +597,6 @@ export const recentActivity: ActivityItem[] = [
   { id: "act4", kind: "assessment", title: "New assessment scheduled for Dorothy Williams", author: "Michael Roberts", timeAgo: "1 hour ago" },
   { id: "act5", kind: "careplan", title: "Care plan updated for Harold Brown", author: "Sarah Johnson", timeAgo: "2 hours ago" },
 ];
-
-export interface WeeklyActivityPoint {
-  day: string;
-  notes: number;
-  tasks: number;
-  wounds: number;
-}
 
 export const weeklyActivity: WeeklyActivityPoint[] = [
   { day: "Mon", notes: 2, tasks: 1, wounds: 0 },
@@ -710,17 +613,6 @@ export const weeklyActivity: WeeklyActivityPoint[] = [
 // Assessments, AN-ACC, Care Plan categories, structured Forms) — used by the
 // 16 resident-profile tabs in src/components/resident/.
 // ---------------------------------------------------------------------------
-
-export interface ResidentDoctor {
-  id: string;
-  residentId: string;
-  name: string;
-  specialty: string;
-  facility: string;
-  phone: string;
-  email: string;
-  primary: boolean;
-}
 
 export const residentDoctors: ResidentDoctor[] = [
   { id: "doc1", residentId: "1", name: "Dr. Sarah Mitchell", specialty: "General Practice", facility: "Sunrise Medical Centre", phone: "02 9123 4567", email: "s.mitchell@medical.com.au", primary: true },
@@ -739,16 +631,6 @@ export const residentDoctors: ResidentDoctor[] = [
   { id: "doc14", residentId: "5", name: "Dr. Michael Chen", specialty: "Geriatrics", facility: "Elder Care Specialists", phone: "02 9123 8899", email: "m.chen@eldercare.com.au", primary: false },
 ];
 
-export interface ResidentContact {
-  id: string;
-  residentId: string;
-  name: string;
-  relationship: string;
-  phone: string;
-  email: string;
-  primary: boolean;
-}
-
 export const residentContacts: ResidentContact[] = [
   { id: "con1", residentId: "1", name: "John Thompson", relationship: "Son", phone: "0412 345 678", email: "john.t@email.com", primary: true },
   { id: "con2", residentId: "1", name: "Mary Thompson", relationship: "Daughter-in-law", phone: "0412 345 679", email: "mary.t@email.com", primary: false },
@@ -758,15 +640,6 @@ export const residentContacts: ResidentContact[] = [
   { id: "con6", residentId: "4", name: "Mary Brown", relationship: "Wife", phone: "0412 345 683", email: "mary.b@email.com", primary: true },
   { id: "con7", residentId: "5", name: "Tom Davis", relationship: "Son", phone: "0412 345 684", email: "tom.d@email.com", primary: true },
 ];
-
-export interface ResidentCardRecord {
-  id: string;
-  residentId: string;
-  type: "Medicare Card" | "IHI Card" | "Concession Card" | "DVA Card";
-  number: string;
-  status: "Active" | "Verified" | "Pending" | "N/A";
-  detail?: string;
-}
 
 export const residentCards: ResidentCardRecord[] = [
   { id: "card1", residentId: "1", type: "Medicare Card", number: "2345 67890 1", status: "Active", detail: "Expires: 12/2026" },
@@ -791,17 +664,6 @@ export const residentCards: ResidentCardRecord[] = [
   { id: "card20", residentId: "5", type: "DVA Card", number: "Not Applicable", status: "N/A" },
 ];
 
-export interface VitalReading {
-  id: string;
-  residentId: string;
-  date: string;
-  systolic: number;
-  diastolic: number;
-  pulse: number;
-  temperature: number;
-  spo2: number;
-}
-
 export const vitalReadings: VitalReading[] = [
   { id: "vr1", residentId: "1", date: "Jan 10", systolic: 128, diastolic: 78, pulse: 72, temperature: 36.6, spo2: 97 },
   { id: "vr2", residentId: "1", date: "Jan 11", systolic: 130, diastolic: 80, pulse: 74, temperature: 36.7, spo2: 97 },
@@ -823,13 +685,6 @@ export const vitalReadings: VitalReading[] = [
   { id: "vr18", residentId: "5", date: "Jan 12", systolic: 120, diastolic: 75, pulse: 69, temperature: 36.4, spo2: 97 },
 ];
 
-export interface WeightPoint {
-  id: string;
-  residentId: string;
-  week: string;
-  value: number;
-}
-
 export const weightReadings: WeightPoint[] = [
   { id: "wp1", residentId: "1", week: "Week 1", value: 62.5 },
   { id: "wp2", residentId: "1", week: "Week 2", value: 62.0 },
@@ -848,13 +703,6 @@ export const weightReadings: WeightPoint[] = [
   { id: "wp15", residentId: "5", week: "Week 3", value: 56.0 },
 ];
 
-export interface ChartBglPoint {
-  id: string;
-  residentId: string;
-  date: string;
-  value: number;
-}
-
 export const chartBglReadings: ChartBglPoint[] = [
   { id: "cb1", residentId: "1", date: "Jan 10", value: 6.8 },
   { id: "cb2", residentId: "1", date: "Jan 11", value: 7.2 },
@@ -867,13 +715,6 @@ export const chartBglReadings: ChartBglPoint[] = [
   { id: "cb9", residentId: "4", date: "Jan 13", value: 8.8 },
   { id: "cb10", residentId: "4", date: "Jan 14", value: 9.0 },
 ];
-
-export interface BehaviorPoint {
-  id: string;
-  residentId: string;
-  date: string;
-  incidents: number;
-}
 
 export const behaviorReadings: BehaviorPoint[] = [
   { id: "bh1", residentId: "1", date: "Jan 10", incidents: 0 },
@@ -895,15 +736,6 @@ export const behaviorReadings: BehaviorPoint[] = [
   { id: "bh17", residentId: "5", date: "Jan 12", incidents: 0 },
 ];
 
-export interface CarePathway {
-  id: string;
-  residentId: string;
-  name: string;
-  totalSteps: number;
-  completedSteps: number;
-  status: "Not Started" | "In Progress" | "Completed";
-}
-
 export const carePathways: CarePathway[] = [
   { id: "path1", residentId: "1", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
   { id: "path2", residentId: "1", name: "End of Life Care Pathway", totalSteps: 12, completedSteps: 0, status: "Not Started" },
@@ -921,17 +753,6 @@ export const carePathways: CarePathway[] = [
   { id: "path14", residentId: "5", name: "New Admission Pathway", totalSteps: 8, completedSteps: 8, status: "Completed" },
   { id: "path15", residentId: "5", name: "Dementia Care Pathway", totalSteps: 11, completedSteps: 5, status: "In Progress" },
 ];
-
-export interface AssessmentRecord {
-  id: string;
-  residentId: string;
-  name: string;
-  date: string;
-  by: string;
-  score: number;
-  summary: string;
-  status: "Completed" | "Scheduled";
-}
 
 export const assessmentRecords: AssessmentRecord[] = [
   { id: "asmt1", residentId: "1", name: "Cognitive Assessment", date: "10/01/2024", by: "Dr. Sarah Mitchell", score: 18, summary: "MMSE score indicates moderate cognitive impairment. Continue current care plan.", status: "Completed" },
@@ -954,18 +775,6 @@ export const assessmentTypeOptions = [
   "Pain Assessment",
   "Behaviour Assessment",
 ];
-
-export interface AnaccDetail {
-  residentId: string;
-  fundingClass: string;
-  fundingLevel: "Low" | "Medium" | "High";
-  dailyRate: string;
-  assessmentDate: string;
-  nextReview: string;
-  domainScores: { label: string; score: number; outOf: number }[];
-  ihiNumber: string;
-  ihiVerified: boolean;
-}
 
 export const anaccDetails: AnaccDetail[] = [
   {
@@ -1050,11 +859,6 @@ export const anaccDetails: AnaccDetail[] = [
   },
 ];
 
-export interface CarePlanCategory {
-  slug: string;
-  label: string;
-}
-
 export const carePlanCategories: CarePlanCategory[] = [
   { slug: "fall-risk", label: "Fall Risk" },
   { slug: "medication", label: "Medication" },
@@ -1064,13 +868,6 @@ export const carePlanCategories: CarePlanCategory[] = [
   { slug: "wellbeing", label: "Wellbeing" },
   { slug: "physiotherapy", label: "Physiotherapy" },
 ];
-
-export interface ClinicalForm {
-  id: string;
-  name: string;
-  category: string;
-  updatedDate: string;
-}
 
 export const clinicalForms: ClinicalForm[] = [
   { id: "cf1", name: "ACFI - Medication Review", category: "Assessment", updatedDate: "15/01/2024" },
@@ -1082,15 +879,6 @@ export const clinicalForms: ClinicalForm[] = [
   { id: "cf7", name: "Nutrition Screening Tool", category: "Nutrition", updatedDate: "09/01/2024" },
   { id: "cf8", name: "Wound Assessment Form", category: "Clinical", updatedDate: "08/01/2024" },
 ];
-
-export interface ResidentDocumentRecord {
-  id: string;
-  residentId: string;
-  name: string;
-  category: string;
-  size: string;
-  uploadDate: string;
-}
 
 export const residentDocuments: ResidentDocumentRecord[] = [
   { id: "rd1", residentId: "1", name: "Admission Documentation", category: "Admission", size: "2.4 MB", uploadDate: "15/05/2023" },

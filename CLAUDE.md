@@ -2,9 +2,25 @@
 
 ## What this project is
 
-An aged care clinical management web app built for **Amber Aged Care** (replacing their existing LeeCare/Amber system). Built from PDF documentation of the original system. All data is mock — no backend connected yet.
+An aged care clinical management web app built for **Amber Aged Care** (replacing their existing LeeCare/Amber system). Built from PDF documentation of the original system. Currently mock data in the frontend; **being productionized** toward a real Node/Express + Postgres backend with auth (see the productionization plan in memory / `~/.claude/plans/`).
 
 **Confidentiality:** This system handles personal and clinical data of aged care residents. Do not share designs, resident data, or documentation outside the team.
+
+---
+
+## Monorepo layout (npm workspaces)
+
+```
+apps/web/        React 18 + TS + Vite frontend (the original app lives here)
+apps/api/        Node/Express + Prisma backend (being built out)
+packages/shared/ Domain types + zod schemas + RBAC permission map — single source of truth
+```
+
+- Run from the repo root: `npm install` (installs all workspaces), `npm run dev:web`, `npm run build`.
+- Path aliases inside `apps/web`: `@/*` → `apps/web/src/*`, `@clinical/shared` → the shared package (raw TS source, no build step).
+- Types live ONLY in `packages/shared/src/types.ts`. `apps/web/src/data/mockData.ts` re-imports them and keeps only the mock data arrays (to be removed resource-by-resource during the backend migration).
+
+> PowerShell note: If npm is blocked, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` once, or use `npm.cmd`.
 
 ---
 
@@ -15,9 +31,8 @@ An aged care clinical management web app built for **Amber Aged Care** (replacin
 - shadcn/ui (Radix UI primitives) — components written manually, not via CLI
 - React Router v6
 - Lucide React icons
-- `npm run dev` to start, `npm run build` to verify
-
-> PowerShell note: If npm is blocked, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` once, or use `npm.cmd`.
+- `react-hook-form` + `zod` (installed; used from the auth/login form onward)
+- Backend (in progress): Node/Express + Prisma + Postgres, JWT-in-httpOnly-cookie auth
 
 ---
 
@@ -32,14 +47,18 @@ An aged care clinical management web app built for **Amber Aged Care** (replacin
 
 ## Key files
 
+All web paths are under `apps/web/`.
+
 | File | Purpose |
 |---|---|
-| `src/data/mockData.ts` | All interfaces and mock data (residents, tasks, notes, care plans, wounds, movements) |
-| `src/App.tsx` | Route definitions |
-| `src/index.css` | Tailwind directives + full CSS variable set (light + dark) |
-| `src/components/layout/` | AppLayout, Sidebar, Header, NavLink |
-| `src/components/resident/` | 16 tab components for ResidentProfile |
-| `src/pages/ResidentProfile.tsx` | Renders all 16 tabs via `<Tabs>` |
+| `packages/shared/src/types.ts` | All domain interfaces — single source of truth across web + api |
+| `packages/shared/src/{schemas,permissions}.ts` | zod validation schemas + RBAC role/permission map |
+| `apps/web/src/data/mockData.ts` | Mock data arrays only (types re-imported from shared); shrinks as backend lands |
+| `apps/web/src/App.tsx` | Route definitions |
+| `apps/web/src/index.css` | Tailwind directives + full CSS variable set (light + dark) |
+| `apps/web/src/components/layout/` | AppLayout, Sidebar, Header, NavLink |
+| `apps/web/src/components/resident/` | 16 tab components for ResidentProfile |
+| `apps/web/src/pages/ResidentProfile.tsx` | Renders all 16 tabs via `<Tabs>` |
 
 ---
 
