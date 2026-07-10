@@ -4,7 +4,7 @@ import {
   CartesianGrid, XAxis, YAxis, Tooltip,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Activity, Droplet, Heart, Plus } from "lucide-react";
+import { Activity, Droplet, Heart, Plus, LineChart as LineChartIcon } from "lucide-react";
 import { vitalReadings, weightReadings, chartBglReadings, behaviorReadings } from "@/data/mockData";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,15 @@ const chartCategories = [
 ] as const;
 
 type ChartKey = (typeof chartCategories)[number]["key"];
+
+function EmptyChart({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+      <LineChartIcon className="h-8 w-8 text-muted-foreground" />
+      <p className="text-sm text-muted-foreground">No {label} recorded for this resident yet.</p>
+    </div>
+  );
+}
 
 interface ChartsTabProps {
   residentId: string;
@@ -60,7 +69,9 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
       </div>
 
       <div className="border rounded-lg p-3 sm:p-4 overflow-x-auto">
-        {active === "vitals" && (
+        {active === "vitals" && (vitals.length === 0 ? (
+          <EmptyChart label="vital sign readings" />
+        ) : (
           <>
             <p className="text-sm font-semibold mb-3">Blood Pressure &amp; Pulse</p>
             <ResponsiveContainer width="100%" height={280}>
@@ -95,9 +106,11 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
               </div>
             )}
           </>
-        )}
+        ))}
 
-        {active === "weight" && (
+        {active === "weight" && (weights.length === 0 ? (
+          <EmptyChart label="weight readings" />
+        ) : (
           <>
             <p className="text-sm font-semibold mb-3">Weight Tracking</p>
             <ResponsiveContainer width="100%" height={280}>
@@ -110,9 +123,11 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
               </AreaChart>
             </ResponsiveContainer>
           </>
-        )}
+        ))}
 
-        {active === "bgl" && (
+        {active === "bgl" && (bgl.length === 0 ? (
+          <EmptyChart label="blood glucose readings" />
+        ) : (
           <>
             <p className="text-sm font-semibold mb-3">Blood Glucose Levels</p>
             <ResponsiveContainer width="100%" height={280}>
@@ -125,9 +140,11 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
               </LineChart>
             </ResponsiveContainer>
           </>
-        )}
+        ))}
 
-        {active === "behavior" && (
+        {active === "behavior" && (behavior.length === 0 ? (
+          <EmptyChart label="behaviour incidents" />
+        ) : (
           <>
             <p className="text-sm font-semibold mb-3">Behaviour Incidents</p>
             <ResponsiveContainer width="100%" height={280}>
@@ -140,7 +157,7 @@ export default function ChartsTab({ residentId }: ChartsTabProps) {
               </BarChart>
             </ResponsiveContainer>
           </>
-        )}
+        ))}
       </div>
     </div>
   );

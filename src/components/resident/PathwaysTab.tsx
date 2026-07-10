@@ -31,6 +31,11 @@ export default function PathwaysTab({ residentId }: PathwaysTabProps) {
         </Button>
       </div>
 
+      {pathways.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8">
+          No care pathways recorded yet.
+        </p>
+      ) : (
       <div className="space-y-3">
         {pathways.map((p) => {
           const percent = p.totalSteps > 0 ? Math.round((p.completedSteps / p.totalSteps) * 100) : 0;
@@ -72,6 +77,7 @@ export default function PathwaysTab({ residentId }: PathwaysTabProps) {
           );
         })}
       </div>
+      )}
     </div>
   );
 }
