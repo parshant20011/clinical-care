@@ -166,7 +166,10 @@ model ProgressNote {
   id          String       @id @default(uuid())
   facilityId  String
   residentId  String
-  authorId    String
+  // Clinical notes outlive the staff member who wrote them, so if a Staff row
+  // is removed we keep the note and null the author (SetNull) rather than
+  // deleting the record. authorId is therefore nullable.
+  authorId    String?
   category    NoteCategory
   note        String
   // AI/RAG: a `embedding vector(1536)` column will be added here in the AI
@@ -176,7 +179,7 @@ model ProgressNote {
   createdAt   DateTime     @default(now())
 
   resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
-  author   Staff    @relation("NoteAuthor", fields: [authorId], references: [id])
+  author   Staff?   @relation("NoteAuthor", fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([facilityId, residentId])
 }
@@ -209,7 +212,7 @@ model Task {
   createdAt  DateTime     @default(now())
 
   resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
-  assignedTo Staff?   @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  assignedTo Staff?   @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   @@index([facilityId, residentId])
 }

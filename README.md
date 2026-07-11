@@ -1,14 +1,77 @@
 # Clinical Care — Aged Care Clinical Management System
 
-A web application for managing clinical operations in aged care facilities, built with React 18, TypeScript, Vite, Tailwind CSS, and shadcn/ui.
+A multi-tenant clinical management platform for aged-care facilities. React 18 + TypeScript frontend, Node/Express + Postgres backend (being built out), organised as an **npm-workspaces monorepo**.
+
+> **Confidentiality Notice:** This system handles personal and clinical information of residents. Do not share designs, data, or documentation outside the team.
 
 ---
 
-## Project Background
+## Monorepo layout
 
-This system replicates the functionality of the **Amber Aged Care / LeeCare** clinical management platform. It was built from scratch based on PDF documentation of the existing system, covering the Residents module and core clinical workflows used daily by nursing staff.
+```
+clinical-care/
+├─ apps/
+│  ├─ web/        React 18 + Vite frontend (the app UI)
+│  └─ api/        Node/Express + Prisma backend (Phase 2+, in progress)
+├─ packages/
+│  └─ shared/     Domain types + zod schemas + RBAC map (used by web AND api)
+├─ docker-compose.yml   Local Postgres (portable option)
+└─ docs/          Security & scope doc + technical learning guide (open in a browser)
+```
 
-> **Confidentiality Notice:** This system may handle personal and clinical information of residents. Do not share designs, data, or documentation outside the team.
+The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status: **Phase 0** (monorepo) and **Phase 1** (multi-tenant Postgres schema + seed) are done; the API and the frontend↔API wiring are next.
+
+---
+
+## Running the project
+
+You need **Node 20+** and a **Postgres 16** database. Pick ONE database option:
+
+### Database — Option A: Docker (recommended, portable, matches prod)
+
+Requires Docker Desktop running.
+
+```bash
+docker compose up -d        # starts Postgres on localhost:5432 (data persists)
+docker compose down          # stop   (docker compose down -v also wipes data)
+```
+
+### Database — Option B: Local Postgres (e.g. Homebrew on macOS)
+
+If you already run Postgres locally on port 5432, create the DB + role the app expects:
+
+```bash
+psql -d postgres -c "CREATE ROLE clinical LOGIN PASSWORD 'localdevpassword' CREATEDB;"
+psql -d postgres -c "CREATE DATABASE clinical_care OWNER clinical;"
+```
+
+> ⚠️ Don't run both options at once — they both use port 5432 and will conflict.
+
+### First-time setup
+
+```bash
+npm install                                   # installs all workspaces
+
+cp apps/api/.env.example apps/api/.env         # then edit: set JWT secrets
+# generate strong secrets:
+#   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+
+npm run prisma:migrate -w @clinical/api        # create the DB tables
+npm run db:seed        -w @clinical/api        # load demo data (1 facility, 7 staff, 5 residents)
+```
+
+### Day-to-day
+
+```bash
+npm run dev:web                                # frontend  → http://localhost:5173
+npm run dev     -w @clinical/api               # backend   → http://localhost:4000  (once Phase 2 lands)
+npm run prisma:studio -w @clinical/api         # visual DB browser
+npm run build                                  # typecheck + build all workspaces
+```
+
+> **Current state:** the frontend (`dev:web`) runs today and shows the full UI, but still reads mock data — it does not talk to the database yet. That wiring happens in Phase 4. The database and seed are real and ready. The API server (`dev -w @clinical/api`) starts existing in Phase 2.
+
+> **PowerShell note:** if npm is blocked, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` once, or use `npm.cmd`.
 
 ---
 
@@ -210,7 +273,7 @@ This is an Australian aged care system. Key concepts:
 
 ## Notes
 
-- Layout uses fixed sidebar (`w-64`) + fixed header (`h-16`). Main content offset: `ml-64 mt-16`.
-- Theming uses CSS custom properties (HSL variables) in `index.css` supporting light and `.dark` modes.
-- Sidebar uses `bg-sidebar` custom variable for its dark background separate from the main theme.
-- All data is currently mock data — no backend or API is connected.
+- Layout uses a fixed sidebar (`w-64`) + fixed header (`h-20`). Main content offset: `ml-64 mt-20 px-8 py-6`.
+- Theming uses CSS custom properties (HSL variables) in `apps/web/src/index.css`.
+- The frontend currently reads mock data (`apps/web/src/data/mockData.ts`); the backend + DB (`apps/api`) exist and are seeded, with the frontend↔API wiring landing in Phase 4.
+- See `docs/01-security-and-scope.html` and `docs/02-technical-learning-guide.html` (open in a browser) for the architecture, DB design, security plan, and a full teach-yourself guide.
