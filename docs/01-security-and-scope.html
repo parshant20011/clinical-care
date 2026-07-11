@@ -109,6 +109,7 @@
 
 <!-- ============================================================ -->
 <h2 id="authn">1. Authentication <span class="pill pill-now">DO NOW</span></h2>
+<div class="rec"><strong>Status: IMPLEMENTED (Phase 3).</strong> bcrypt password verification, JWT access+refresh tokens in httpOnly/Secure/SameSite=strict cookies, and <code>/api/auth</code> login·logout·refresh·me are live and verified (an unauthenticated request gets 401; a valid login sets cookies and returns the user). Deactivated accounts are locked out on the next request. Still to do (pre-pilot): account lockout, password-strength policy, and MFA for privileged roles.</div>
 <p><strong>Requirement (from scope):</strong> "Create system users, assign roles, activate/deactivate, password reset."</p>
 
 <h4>What we are doing</h4>
@@ -125,6 +126,7 @@
 
 <!-- ============================================================ -->
 <h2 id="authz">2. Authorization (RBAC) &amp; Multi-Tenancy <span class="pill pill-now">DO NOW</span></h2>
+<div class="rec"><strong>Status: IMPLEMENTED (Phase 2).</strong> The shared permission map is enforced server-side by <code>requirePermission</code> middleware on every route, and verified: a Carer's attempt to create a resident returns <strong>403</strong> while an Admin's returns <strong>201</strong>. Tenancy is enforced by taking <code>facilityId</code> from the session token (never the client) on every query — proven at the DB layer (cross-facility query → 0 rows) and now at the API layer. Resident-level care-team scoping remains a later enhancement.</div>
 <p><strong>Requirement:</strong> "Assign user roles" — four roles: Registered Nurse, Care Manager, Admin, Carer.</p>
 
 <h4>What we are doing</h4>
@@ -157,6 +159,7 @@
 
 <!-- ============================================================ -->
 <h2 id="audit">4. Audit Logging &amp; Accountability <span class="pill pill-now">DO NOW</span></h2>
+<div class="rec"><strong>Status: IMPLEMENTED (Phase 2, mutations).</strong> An <code>auditMutations</code> middleware writes every successful create/update/delete to <code>AuditLog</code> with actor id, action, entity, a one-way-hashed IP, and facilityId — <em>no PII in the body</em>. Verified after live requests. Still to do: log read access (viewing a resident), make the table append-only at the DB level (revoke UPDATE/DELETE), and hash-chain rows for tamper-evidence.</div>
 <p><strong>Requirement:</strong> "User activity logs, record change history, access logs."</p>
 
 <h4>What we are doing</h4>
@@ -169,6 +172,7 @@
 
 <!-- ============================================================ -->
 <h2 id="api-security">5. API &amp; Transport Security <span class="pill pill-now">DO NOW</span></h2>
+<div class="rec"><strong>Status: IMPLEMENTED (Phase 2).</strong> <code>helmet</code>, a strict <code>cors</code> allowlist (only the frontend origin, credentials enabled for cookies), a global rate limit, and a tighter <code>/auth</code> limiter are all wired in <code>app.ts</code>. A 1&nbsp;MB JSON body cap guards against payload-bomb DoS. Still to do: custom CSP tightening and a WAF before pilot.</div>
 <ul>
   <li><strong>helmet</strong> — sets secure HTTP headers (CSP, HSTS, X-Frame-Options, etc.) in one line.</li>
   <li><strong>CORS allowlist</strong> — only the known frontend origin may call the API (no wildcard).</li>

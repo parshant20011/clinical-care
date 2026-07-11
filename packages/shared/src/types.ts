@@ -284,3 +284,51 @@ export interface ResidentDocumentRecord {
   size: string;
   uploadDate: string;
 }
+
+// ---------------------------------------------------------------------------
+// API DTOs — the exact shapes the backend returns over HTTP. These are the
+// contract between apps/api and apps/web (used from Phase 4 onward). They map
+// only fields the real database stores, unlike the richer mock-era interfaces
+// above (which carried denormalized flags the DB never persisted).
+// ---------------------------------------------------------------------------
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  shift: string | null;
+  facilityId: string;
+}
+
+export interface ResidentListItem {
+  id: string;
+  name: string;
+  preferredName: string | null;
+  room: string;
+  age: number;
+  gender: string;
+  diagnosis: string;
+  careLevel: "Low" | "Medium" | "High";
+  accountStatus: "Active" | "Inactive";
+  admissionType: "Permanent" | "Respite";
+}
+
+export interface ResidentDetail extends ResidentListItem {
+  nationality: string | null;
+  dateOfAdmission: string;
+  onLeave: boolean;
+  ihi: string | null;
+  medicareCard: string | null;
+  concessionNumber: string | null;
+  allergies: { type: string; description: string; severity: string }[];
+}
+
+export interface ProgressNoteDTO {
+  id: string;
+  residentId: string;
+  category: "clinical" | "personal care" | "behaviour" | "incident";
+  note: string;
+  authorId: string | null;
+  createdAt: string;
+}

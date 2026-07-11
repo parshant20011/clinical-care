@@ -19,7 +19,7 @@ clinical-care/
 └─ docs/          Security & scope doc + technical learning guide (open in a browser)
 ```
 
-The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status: **Phase 0** (monorepo) and **Phase 1** (multi-tenant Postgres schema + seed) are done; the API and the frontend↔API wiring are next.
+The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status: **Phase 0** (monorepo), **Phase 1** (multi-tenant Postgres + seed), and **Phases 2–3** (Express API with JWT-cookie auth, RBAC, tenant scoping, and audit logging) are done and verified. Next: **Phase 4** — wire the React frontend to the API (TanStack Query + login page + route guard).
 
 ---
 
@@ -69,7 +69,7 @@ npm run prisma:studio -w @clinical/api         # visual DB browser
 npm run build                                  # typecheck + build all workspaces
 ```
 
-> **Current state:** the frontend (`dev:web`) runs today and shows the full UI, but still reads mock data — it does not talk to the database yet. That wiring happens in Phase 4. The database and seed are real and ready. The API server (`dev -w @clinical/api`) starts existing in Phase 2.
+> **Current state:** the API (`dev -w @clinical/api`) is live — auth, RBAC, tenant-scoped residents + progress notes, and audit logging all work against Postgres. The frontend (`dev:web`) also runs, but still reads mock data; wiring it to the API (with a login page) is Phase 4. Try the API with: log in via `POST /api/auth/login` (any seed email, password `Password123!`), then `GET /api/residents`.
 
 > **PowerShell note:** if npm is blocked, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` once, or use `npm.cmd`.
 
