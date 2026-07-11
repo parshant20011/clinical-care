@@ -1,0 +1,476 @@
+// Clinical Care — Prisma schema (multi-tenant).
+//
+// Tenancy model: SHARED database, SHARED tables, row-level isolation via
+// `facilityId` on every tenant-owned row (see docs/01-security-and-scope.html
+// §11). A request middleware injects the logged-in user's facilityId into every
+// query, so a facility can only ever see its own rows. UUID primary keys are
+// used so ids are non-guessable and safe to generate anywhere.
+//
+// Regenerate client after edits:  npm run prisma:generate -w @clinical/api
+// Create/apply a migration:        npm run prisma:migrate  -w @clinical/api
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy + identity
+// ---------------------------------------------------------------------------
+
+// The tenant root. One row per customer (aged-care home / hospital).
+model Facility {
+  id        String   @id @default(uuid())
+  name      String
+  region    String   @default("ap-southeast-2") // AU data residency
+  createdAt DateTime @default(now())
+
+  staff     Staff[]
+  residents Resident[]
+  auditLogs AuditLog[]
+}
+
+enum Role {
+  REGISTERED_NURSE
+  CARE_MANAGER
+  ADMIN
+  CARER
+}
+
+enum Shift {
+  MORNING
+  AFTERNOON
+  NIGHT
+}
+
+// A staff login. One user belongs to exactly one facility.
+model Staff {
+  id           String   @id @default(uuid())
+  facilityId   String
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  shift        Shift?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  facility          Facility       @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  authoredNotes     ProgressNote[] @relation("NoteAuthor")
+  assignedTasks     Task[]         @relation("TaskAssignee")
+  auditLogs         AuditLog[]
+
+  @@index([facilityId])
+}
+
+// ---------------------------------------------------------------------------
+// Resident (the clinical hub) + master data
+// ---------------------------------------------------------------------------
+
+enum CareLevel {
+  Low
+  Medium
+  High
+}
+
+enum AdmissionType {
+  Permanent
+  Respite
+}
+
+enum AccountStatus {
+  Active
+  Inactive
+}
+
+model Resident {
+  id                String        @id @default(uuid())
+  facilityId        String
+  name              String
+  preferredName     String?
+  room              String
+  dateOfAdmission   DateTime
+  age               Int
+  gender            String
+  nationality       String?
+  admissionType     AdmissionType @default(Permanent)
+  onLeave           Boolean       @default(false)
+  careLevel         CareLevel     @default(Medium)
+  accountStatus     AccountStatus @default(Active)
+  diagnosis         String
+
+  // National identifiers — application-level encrypted before storage
+  // (see security doc §3). Stored as ciphertext strings.
+  ihi               String?
+  medicareCard      String?
+  concessionNumber  String?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  facility     Facility        @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  allergies    Allergy[]
+  progressNotes ProgressNote[]
+  tasks        Task[]
+  checklists   Checklist[]
+  carePlans    CarePlan[]
+  wounds       Wound[]
+  movements    Movement[]
+  doctors      ResidentDoctor[]
+  contacts     Contact[]
+  cards        Card[]
+  vitals       VitalReading[]
+  assessments  Assessment[]
+  anacc        AnaccDetail?
+  pathways     CarePathway[]
+  documents    Document[]
+
+  @@index([facilityId])
+}
+
+enum Severity {
+  Low
+  Medium
+  High
+}
+
+model Allergy {
+  id          String   @id @default(uuid())
+  facilityId  String
+  residentId  String
+  type        String
+  description String
+  severity    Severity
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+// ---------------------------------------------------------------------------
+// Clinical records (all resident-scoped one-to-many)
+// ---------------------------------------------------------------------------
+
+enum NoteCategory {
+  clinical
+  personal_care
+  behaviour
+  incident
+}
+
+model ProgressNote {
+  id          String       @id @default(uuid())
+  facilityId  String
+  residentId  String
+  authorId    String
+  category    NoteCategory
+  note        String
+  // AI/RAG: a `embedding vector(1536)` column will be added here in the AI
+  // phase, once the pgvector extension is enabled (CREATE EXTENSION vector).
+  // Reserved in the design (docs §11) but omitted now so local Postgres without
+  // pgvector can migrate cleanly.
+  createdAt   DateTime     @default(now())
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  author   Staff    @relation("NoteAuthor", fields: [authorId], references: [id])
+
+  @@index([facilityId, residentId])
+}
+
+enum TaskPriority {
+  Low
+  Medium
+  High
+  Urgent
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+  overdue
+}
+
+model Task {
+  id         String       @id @default(uuid())
+  facilityId String
+  residentId String
+  assignedToId String?
+  title      String
+  priority   TaskPriority @default(Medium)
+  status     TaskStatus   @default(pending)
+  dueDate    DateTime?
+  notes      String?
+  createdBy  String?
+  createdAt  DateTime     @default(now())
+
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  assignedTo Staff?   @relation("TaskAssignee", fields: [assignedToId], references: [id])
+
+  @@index([facilityId, residentId])
+}
+
+model Checklist {
+  id          String   @id @default(uuid())
+  facilityId  String
+  residentId  String
+  type        String
+  date        DateTime
+  completedBy String?
+
+  resident Resident        @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  items    ChecklistItem[]
+
+  @@index([facilityId, residentId])
+}
+
+model ChecklistItem {
+  id          String   @id @default(uuid())
+  checklistId String
+  name        String
+  completed   Boolean  @default(false)
+  completedBy String?
+  completedAt String?
+
+  checklist Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@index([checklistId])
+}
+
+enum CarePlanStatus {
+  active
+  archived
+}
+
+model CarePlan {
+  id            String         @id @default(uuid())
+  facilityId    String
+  residentId    String
+  type          String
+  observations  String
+  goals         String
+  interventions String
+  reviewDate    DateTime
+  createdBy     String
+  status        CarePlanStatus @default(active)
+  createdAt     DateTime       @default(now())
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+enum WoundStatus {
+  active
+  healing
+  healed
+  archived
+}
+
+model Wound {
+  id              String      @id @default(uuid())
+  facilityId      String
+  residentId      String
+  startedDate     DateTime
+  onAdmission     Boolean     @default(false)
+  woundType       String
+  location        String
+  dressingProduct String?
+  nextDressing    DateTime?
+  lastReview      DateTime?
+  nextReview      DateTime?
+  status          WoundStatus @default(active)
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+model Movement {
+  id         String   @id @default(uuid())
+  facilityId String
+  residentId String
+  date       DateTime
+  time       String
+  type       String
+  note       String
+  recordedBy String
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+model ResidentDoctor {
+  id         String  @id @default(uuid())
+  facilityId String
+  residentId String
+  name       String
+  specialty  String
+  facilityName String
+  phone      String
+  email      String
+  primary    Boolean @default(false)
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+model Contact {
+  id           String  @id @default(uuid())
+  facilityId   String
+  residentId   String
+  name         String
+  relationship String
+  phone        String
+  email        String
+  primary      Boolean @default(false)
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+enum CardType {
+  Medicare_Card
+  IHI_Card
+  Concession_Card
+  DVA_Card
+}
+
+enum CardStatus {
+  Active
+  Verified
+  Pending
+  NA
+}
+
+model Card {
+  id         String     @id @default(uuid())
+  facilityId String
+  residentId String
+  type       CardType
+  number     String // encrypted for identifier cards
+  status     CardStatus
+  detail     String?
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+model VitalReading {
+  id          String   @id @default(uuid())
+  facilityId  String
+  residentId  String
+  recordedAt  DateTime
+  systolic    Int
+  diastolic   Int
+  pulse       Int
+  temperature Float
+  spo2        Int
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+enum AssessmentStatus {
+  Completed
+  Scheduled
+}
+
+model Assessment {
+  id         String           @id @default(uuid())
+  facilityId String
+  residentId String
+  name       String
+  date       DateTime
+  by         String
+  score      Int
+  summary    String
+  status     AssessmentStatus @default(Completed)
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+model AnaccDetail {
+  id             String   @id @default(uuid())
+  facilityId     String
+  residentId     String   @unique
+  fundingClass   String
+  fundingLevel   CareLevel
+  dailyRate      String
+  assessmentDate DateTime
+  nextReview     DateTime
+  domainScores   Json // [{ label, score, outOf }]
+  ihiNumber      String
+  ihiVerified    Boolean  @default(false)
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId])
+}
+
+enum PathwayStatus {
+  Not_Started
+  In_Progress
+  Completed
+}
+
+model CarePathway {
+  id             String        @id @default(uuid())
+  facilityId     String
+  residentId     String
+  name           String
+  totalSteps     Int
+  completedSteps Int
+  status         PathwayStatus @default(Not_Started)
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  facilityId String
+  residentId String
+  name       String
+  category   String
+  size       String
+  uploadDate DateTime
+  storageKey String? // points to object storage; bytes never in the DB
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId, residentId])
+}
+
+// ---------------------------------------------------------------------------
+// Audit trail (append-only; NO PII in the body — see security doc §4)
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  facilityId String
+  actorId    String?
+  action     String // e.g. "create", "update", "delete", "view", "login"
+  entity     String // e.g. "Resident", "ProgressNote"
+  entityId   String?
+  ipHash     String?
+  metadata   Json?
+  at         DateTime @default(now())
+
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  actor    Staff?   @relation(fields: [actorId], references: [id])
+
+  @@index([facilityId, at])
+}

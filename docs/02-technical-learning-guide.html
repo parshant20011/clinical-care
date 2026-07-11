@@ -70,6 +70,7 @@
   <div><a href="#validation">13. Validation with zod</a></div>
   <div><a href="#glossary">14. Glossary of every term</a></div>
   <div><a href="#build-it">15. Build it yourself: checklist</a></div>
+  <div><a href="#progress">16. Build log — what's done <span class="tag">LIVE</span></a></div>
 </div>
 
 <!-- ===================================================== -->
@@ -406,6 +407,67 @@ type CreateTaskInput = z.infer&lt;typeof createTaskSchema&gt;;  // free TypeScri
   <li><strong>Ship</strong> — CI (lint+test+build), deploy frontend static + backend + managed Postgres.</li>
 </ol>
 <div class="try"><strong>Learning tip.</strong> Don't try to hold it all at once. The one idea that unlocks everything: <em>the browser asks, the server decides, the database remembers.</em> Every feature — notes, tasks, login, AI — is just another trip around that loop. Master one full loop (e.g. progress notes) and the other 20 are copies of it.</div>
+
+<!-- ===================================================== -->
+<h2 id="progress">16. Build log — what's actually done <span class="tag">LIVE</span></h2>
+<p>This section grows with every development step, so you can see exactly what has been built and how. Newest phase last.</p>
+
+<h3>✅ Phase 0 — Monorepo &amp; shared types</h3>
+<ul>
+  <li>Split the single Vite app into an <strong>npm-workspaces monorepo</strong>: <code>apps/web</code>, <code>apps/api</code>, <code>packages/shared</code>.</li>
+  <li>Moved all 26 domain interfaces into <code>packages/shared/src/types.ts</code> — the single source of truth. <code>mockData.ts</code> now re-imports them, so nothing broke.</li>
+  <li>Added <code>permissions.ts</code> (RBAC role→action map) and <code>schemas.ts</code> (zod) to shared.</li>
+</ul>
+
+<h3>✅ Phase 1 — Database, Prisma &amp; multi-tenant seed</h3>
+<p>The app now has a <strong>real Postgres database</strong> mirroring all the demo data. Here's everything introduced, in learn-able detail.</p>
+
+<h4>New terms this phase</h4>
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><strong>Shadow database</strong></td><td>A temporary DB Prisma creates during <code>migrate dev</code> to detect drift between your schema and migrations. (That's why the DB role needs <code>CREATEDB</code>.)</td></tr>
+  <tr><td><strong>Prisma Client</strong></td><td>The auto-generated, fully-typed query API. <code>prisma.resident.findMany()</code> knows every column because it was generated from <code>schema.prisma</code>.</td></tr>
+  <tr><td><strong>Cascade delete</strong></td><td><code>onDelete: Cascade</code> — deleting a resident automatically deletes all their notes/tasks/etc., so no orphaned rows are left behind.</td></tr>
+  <tr><td><strong>Composite index</strong></td><td><code>@@index([facilityId, residentId])</code> — a lookup optimization on two columns together, matching how every clinical query filters.</td></tr>
+  <tr><td><strong>Enum</strong></td><td>A column that may only hold one of a fixed set of values (e.g. <code>CareLevel = Low | Medium | High</code>). Enforced by the DB itself.</td></tr>
+  <tr><td><strong>Idempotent seed</strong></td><td>A seed you can re-run safely — ours deletes the seed facility first, so running it twice doesn't duplicate data.</td></tr>
+</table>
+
+<h4>How multi-tenancy is stored</h4>
+<p>Every tenant-owned table has a <code>facilityId</code> column. The tenant root is the <code>Facility</code> table; <code>Staff</code> and <code>Resident</code> point at it, and every clinical record points at a resident (and also carries <code>facilityId</code> for direct, index-friendly filtering).</p>
+<pre><code>Facility (1) ──&lt; Staff (many)
+Facility (1) ──&lt; Resident (many) ──&lt; ProgressNote / Task / Wound / … (many)
+                                     each row ALSO stores facilityId</code></pre>
+<div class="why"><strong>Why store <code>facilityId</code> on the leaf tables too</strong> (not just derive it through the resident)? Speed and safety. Every clinical query can filter <code>WHERE facilityId = ?</code> directly against a composite index, and the tenant guard works even on tables you reach without joining through Resident.</div>
+
+<h4>Proof it isolates tenants</h4>
+<p>After seeding one facility with 5 residents, a query scoped to a <em>different</em> facility id returns nothing:</p>
+<pre><code>SELECT count(*) FROM "Resident"
+WHERE "facilityId" = '&lt;some-other-facility&gt;';
+-- → 0   (this facility's data is invisible to others)</code></pre>
+<p>That single property, enforced on every query, is what lets you safely sell one deployment to many hospitals/homes.</p>
+
+<h4>The commands you actually run</h4>
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>prisma generate</code></td><td>Builds the typed client from <code>schema.prisma</code>.</td></tr>
+  <tr><td><code>prisma migrate dev --name init</code></td><td>Turns the schema into real SQL tables + records a versioned migration file.</td></tr>
+  <tr><td><code>tsx prisma/seed.ts</code></td><td>Loads the mock arrays into Postgres (1 facility, 7 staff, 5 residents, all clinical children).</td></tr>
+  <tr><td><code>prisma studio</code></td><td>Opens a visual browser of the database (great for learning).</td></tr>
+</table>
+
+<h4>Security introduced this phase</h4>
+<ul>
+  <li><strong>Passwords hashed with bcrypt</strong> (cost 12) even for seed users — never plaintext.</li>
+  <li><strong>Env validated at boot</strong> (<code>config/env.ts</code> with zod): the server won't start without valid <code>DATABASE_URL</code> and JWT secrets. Real <code>.env</code> is gitignored; <code>.env.example</code> documents it.</li>
+  <li><strong>Identifier columns</strong> (<code>ihi</code>, <code>medicareCard</code>) are isolated so they can be column-encrypted in the pre-pilot hardening step.</li>
+  <li><strong>Audit log table</strong> created (append-only, no PII in body) ready for the API to write to.</li>
+</ul>
+
+<div class="try"><strong>Try it yourself.</strong> Run <code>npm run prisma:studio -w @clinical/api</code> and click through the tables — you'll see the exact residents from the mock UI, now living in Postgres. Change a name in Studio, refresh: it persisted. That's the difference between mock data and a real database.</div>
+
+<h3>⏭️ Next: Phase 2 — the Express API</h3>
+<p>The database exists but nothing talks to it yet over HTTP. Phase 2 builds the layered API (routes → middleware → controller → service → repository) so the frontend can read/write this data — starting with the residents resource end-to-end.</p>
 
 <hr>
 <p class="meta">Pair this with <strong>01-security-and-scope.html</strong> for the requirements + security + DB-design view. Both are living documents — update them as the code evolves.</p>

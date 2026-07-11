@@ -1,0 +1,31 @@
+# Local development Postgres for the Clinical Care API.
+#
+# Uses the pgvector image so the AI/RAG `embedding` column (see the DB design
+# in docs/01-security-and-scope.html) works without a separate extension setup.
+# This is DEV ONLY — production uses a managed AU-region Postgres.
+#
+#   docker compose up -d      # start the database
+#   docker compose down       # stop it (data persists in the named volume)
+#   docker compose down -v     # stop AND wipe the data
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: clinical-care-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: clinical
+      POSTGRES_PASSWORD: localdevpassword
+      POSTGRES_DB: clinical_care
+    ports:
+      - "5432:5432"
+    volumes:
+      - clinical_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinical -d clinical_care"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  clinical_pgdata:

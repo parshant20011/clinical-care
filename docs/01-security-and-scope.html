@@ -226,6 +226,7 @@
 
 <!-- ============================================================ -->
 <h2 id="db-design">11. Database Design</h2>
+<div class="rec"><strong>Status: IMPLEMENTED (Phase 1).</strong> This design is now live in Postgres via Prisma (<code>apps/api/prisma/schema.prisma</code>). All tables below exist with <code>facilityId</code> + UUID keys + cascade deletes + composite indexes, seeded from the demo data (1 facility, 7 staff, 5 residents, all clinical children). Tenant isolation was verified: a query scoped to a different facility returns zero rows. The <code>pgvector</code> embedding column is deferred to the AI phase (local Postgres lacks the extension); everything else is built.</div>
 <p>Postgres, normalized, multi-tenant. <code>Facility</code> is the tenant root; <code>Resident</code> is the clinical hub with many resident-scoped child tables. <code>Staff</code> and <code>AuditLog</code> are facility-scoped. Diagram below (simplified — child clinical tables all follow the same <code>resident_id</code> FK pattern).</p>
 
 <div class="mermaid">
