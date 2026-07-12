@@ -11,9 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { appNotifications } from "@/data/mockData";
+import { appNotifications, ROLE_LABELS, type Role } from "@clinical/shared";
 import { useAuth } from "@/context/AuthContext";
-import { ROLE_LABELS, type Role } from "@clinical/shared";
 import { cn } from "@/lib/utils";
 
 const pageMeta: Record<string, { title: string; subtitle: string }> = {

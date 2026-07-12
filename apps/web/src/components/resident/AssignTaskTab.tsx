@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { residents, tasks, staffUsers } from "@/data/mockData";
+import { useResidents } from "@/services/residents";
+import { useTasks, useCreateTask, useStaff } from "@/services/tasks";
 import { cn } from "@/lib/utils";
 import { Send, CalendarDays } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -24,21 +25,43 @@ interface AssignTaskTabProps {
 }
 
 export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
+  const { data: residents = [] } = useResidents();
+  const { data: staffUsers = [] } = useStaff();
+  const { data: residentTasks = [] } = useTasks(residentId);
+  const createTask = useCreateTask();
+
   const [selectedResident, setSelectedResident] = useState(residentId);
   const [staffMember, setStaffMember] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<typeof priorities[number]>("Medium");
   const [dueDate, setDueDate] = useState("");
 
-  const residentTasks = tasks.filter((t) => t.residentId === residentId);
-
   const handleSubmit = () => {
     if (!selectedResident || !staffMember || !description.trim()) return;
-    toast({ title: "Task Created", description: "The task has been assigned successfully." });
-    setStaffMember("");
-    setDescription("");
-    setPriority("Medium");
-    setDueDate("");
+    createTask.mutate(
+      {
+        residentId: selectedResident,
+        assignedToId: staffMember,
+        title: description,
+        priority,
+        dueDate: dueDate || undefined,
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Task Created", description: "The task has been assigned successfully." });
+          setStaffMember("");
+          setDescription("");
+          setPriority("Medium");
+          setDueDate("");
+        },
+        onError: (err) =>
+          toast({
+            title: "Could not create task",
+            description: err instanceof Error ? err.message : undefined,
+            variant: "destructive",
+          }),
+      },
+    );
   };
 
   return (
@@ -70,7 +93,7 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
             </SelectTrigger>
             <SelectContent>
               {staffUsers.map((s) => (
-                <SelectItem key={s.id} value={s.name}>
+                <SelectItem key={s.id} value={s.id}>
                   {s.name} — {s.role}
                 </SelectItem>
               ))}
@@ -116,9 +139,9 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
           </div>
         </div>
 
-        <Button className="w-full" size="lg" onClick={handleSubmit}>
+        <Button className="w-full" size="lg" onClick={handleSubmit} disabled={createTask.isPending}>
           <Send className="h-4 w-4 mr-2" />
-          Assign Task
+          {createTask.isPending ? "Assigning…" : "Assign Task"}
         </Button>
       </div>
 
@@ -132,10 +155,10 @@ export default function AssignTaskTab({ residentId }: AssignTaskTabProps) {
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{task.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Assigned to: {task.assignedTo}
+                      Assigned to: {task.assignedToName ?? "Unassigned"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Due: {task.dueDate}
+                      Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString("en-AU") : "—"}
                     </p>
                   </div>
                   <span

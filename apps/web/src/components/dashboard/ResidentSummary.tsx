@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { residents } from "@/data/mockData";
+import { useResidents } from "@/services/residents";
+import QueryState from "@/components/QueryState";
 import { cn } from "@/lib/utils";
 
 const careLevelDot = {
@@ -10,13 +11,9 @@ const careLevelDot = {
   High: "bg-red-500",
 };
 
-function formatRoom(residence: string, room: string) {
-  const wing = residence.includes("1") ? "A" : residence.includes("2") ? "B" : "C";
-  return `Room ${wing}${room}`;
-}
-
 export default function ResidentSummary() {
   const navigate = useNavigate();
+  const { data: residents = [], isLoading, isError } = useResidents();
 
   return (
     <Card>
@@ -32,6 +29,13 @@ export default function ResidentSummary() {
         </Button>
       </CardHeader>
       <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+        <QueryState
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={residents.length === 0}
+          emptyMessage="No residents yet."
+          errorMessage="Couldn't load residents."
+        >
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {residents.slice(0, 6).map((resident) => (
             <div
@@ -48,7 +52,7 @@ export default function ResidentSummary() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold leading-tight">{resident.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{formatRoom(resident.residence, resident.room)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Room {resident.room}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between">
@@ -61,6 +65,7 @@ export default function ResidentSummary() {
             </div>
           ))}
         </div>
+        </QueryState>
       </CardContent>
     </Card>
   );

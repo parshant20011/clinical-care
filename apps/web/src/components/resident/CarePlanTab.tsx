@@ -5,7 +5,9 @@ import {
   PersonStanding, Pill, Bandage, Droplets, Utensils, Smile, Dumbbell,
   Plus, ChevronRight, ChevronDown,
 } from "lucide-react";
-import { carePlans, carePlanCategories } from "@/data/mockData";
+import { carePlanCategories } from "@clinical/shared";
+import { useCarePlans } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 
 const categoryIcons: Record<string, typeof Pill> = {
   "fall-risk": PersonStanding,
@@ -23,7 +25,7 @@ interface CarePlanTabProps {
 
 export default function CarePlanTab({ residentId }: CarePlanTabProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const plans = carePlans.filter((p) => p.residentId === residentId);
+  const { data: plans = [], isLoading, isError } = useCarePlans(residentId);
 
   return (
     <div className="space-y-6">
@@ -50,11 +52,12 @@ export default function CarePlanTab({ residentId }: CarePlanTabProps) {
         })}
       </div>
 
-      {plans.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          No care plans recorded yet.
-        </p>
-      ) : (
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={plans.length === 0}
+        emptyMessage="No care plans recorded yet."
+      >
         <div className="space-y-3">
           {plans.map((plan) => {
             const isOpen = expanded === plan.id;
@@ -66,7 +69,9 @@ export default function CarePlanTab({ residentId }: CarePlanTabProps) {
                 >
                   <div>
                     <p className="text-sm font-medium">{plan.type}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Review: {plan.reviewDate}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Review: {new Date(plan.reviewDate).toLocaleDateString("en-AU")}
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge className="bg-green-50 text-green-600 hover:bg-green-50 border-transparent">
@@ -99,7 +104,7 @@ export default function CarePlanTab({ residentId }: CarePlanTabProps) {
             );
           })}
         </div>
-      )}
+      </QueryState>
     </div>
   );
 }

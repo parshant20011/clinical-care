@@ -34,13 +34,24 @@ export const createProgressNoteSchema = z.object({
 });
 export type CreateProgressNoteInput = z.infer<typeof createProgressNoteSchema>;
 
-// Task create payload (AssignTaskTab form).
+// Task create payload (AssignTaskTab form). assignedToId is a Staff id.
 export const createTaskSchema = z.object({
-  residentId: z.string().min(1),
+  residentId: z.string().min(1, "Resident is required"),
   title: z.string().min(1, "Task description is required"),
-  assignedTo: z.string().min(1, "Assignee is required"),
+  assignedToId: z.string().min(1, "Assignee is required"),
   priority: z.enum(["Low", "Medium", "High", "Urgent"]).default("Medium"),
   dueDate: z.string().optional(),
   notes: z.string().optional(),
 });
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+
+// Task update payload — used to change status (e.g. "Mark Complete") or reassign.
+export const updateTaskSchema = z.object({
+  title: z.string().min(1).optional(),
+  assignedToId: z.string().optional(),
+  priority: z.enum(["Low", "Medium", "High", "Urgent"]).optional(),
+  status: z.enum(["pending", "in_progress", "completed", "overdue"]).optional(),
+  dueDate: z.string().optional(),
+  notes: z.string().optional(),
+});
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;

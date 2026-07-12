@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { FileText, DollarSign, Calendar, CalendarClock, Pencil, CheckCircle2 } from "lucide-react";
-import { anaccDetails } from "@/data/mockData";
+import { useAnacc } from "@/services/clinical";
 import { toast } from "@/hooks/use-toast";
 import type { ResidentDetail } from "@clinical/shared";
 
@@ -11,8 +11,16 @@ interface ANACCTabProps {
   resident?: ResidentDetail;
 }
 
+const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-AU");
+
 export default function ANACCTab({ resident }: ANACCTabProps) {
-  const detail = anaccDetails.find((a) => a.residentId === resident?.id);
+  const { data: detail, isLoading } = useAnacc(resident?.id ?? "");
+
+  if (isLoading) {
+    return (
+      <p className="text-sm text-muted-foreground text-center py-8">Loading…</p>
+    );
+  }
 
   if (!detail) {
     return (
@@ -53,14 +61,14 @@ export default function ANACCTab({ resident }: ANACCTabProps) {
           <p className="text-xs text-muted-foreground flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5" /> Assessment Date
           </p>
-          <p className="text-xl font-bold mt-1">{detail.assessmentDate}</p>
+          <p className="text-xl font-bold mt-1">{fmt(detail.assessmentDate)}</p>
           <p className="text-xs text-muted-foreground mt-1">Last assessment</p>
         </div>
         <div className="rounded-lg border border-l-4 border-l-green-500 p-4">
           <p className="text-xs text-muted-foreground flex items-center gap-1.5">
             <CalendarClock className="h-3.5 w-3.5" /> Next Review
           </p>
-          <p className="text-xl font-bold mt-1">{detail.nextReview}</p>
+          <p className="text-xl font-bold mt-1">{fmt(detail.nextReview)}</p>
           <p className="text-xs text-muted-foreground mt-1">Scheduled review</p>
         </div>
       </div>

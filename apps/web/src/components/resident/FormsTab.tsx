@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Search, FileText, Plus, ExternalLink } from "lucide-react";
-import { clinicalForms, type ClinicalForm } from "@/data/mockData";
+import { clinicalForms, type ClinicalForm } from "@clinical/shared";
 import { toast } from "@/hooks/use-toast";
 
 export default function FormsTab() {

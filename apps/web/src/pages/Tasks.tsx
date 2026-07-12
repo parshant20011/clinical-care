@@ -10,7 +10,11 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Search, Plus, ChevronRight, User, Clock } from "lucide-react";
-import { tasks as initialTasks, residents, type Task } from "@/data/mockData";
+import type { TaskDTO } from "@clinical/shared";
+import { useTasks, useCreateTask, useUpdateTask, useStaff } from "@/services/tasks";
+import { useResidents } from "@/services/residents";
+import QueryState from "@/components/QueryState";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import TaskDetailDialog from "@/components/tasks/TaskDetailDialog";
 
@@ -21,55 +25,79 @@ const statusColors = {
   overdue: "bg-red-100 text-red-700",
 };
 
-const roles = [
-  "Registered Nurse", "Enrolled Nurse", "Care Manager", "Physiotherapist",
-  "Occupational Therapist", "Podiatrist", "Dietitian", "GP", "Social Worker",
-];
+const fmtDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString("en-AU") : "—";
 
-const emptyForm = { title: "", residentId: "", assignedTo: "", dueDate: "", priority: "Medium" as Task["priority"] };
+const emptyForm = {
+  title: "",
+  residentId: "",
+  assignedToId: "",
+  dueDate: "",
+  priority: "Medium" as TaskDTO["priority"],
+};
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [status, setStatus] = useState<"all" | Task["status"]>("all");
-  const [priority, setPriority] = useState<"all" | Task["priority"]>("all");
+  const { data: tasks = [], isLoading, isError } = useTasks();
+  const { data: residents = [] } = useResidents();
+  const { data: staff = [] } = useStaff();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+
+  const [status, setStatus] = useState<"all" | TaskDTO["status"]>("all");
+  const [priority, setPriority] = useState<"all" | TaskDTO["priority"]>("all");
   const [search, setSearch] = useState("");
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskDTO | null>(null);
   const [newOpen, setNewOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
   const filtered = tasks.filter((t) => {
     const matchStatus = status === "all" || t.status === status;
     const matchPriority = priority === "all" || t.priority === priority;
+    const q = search.toLowerCase();
     const matchSearch =
-      t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.residentName.toLowerCase().includes(search.toLowerCase()) ||
-      t.assignedTo.toLowerCase().includes(search.toLowerCase());
+      t.title.toLowerCase().includes(q) ||
+      t.residentName.toLowerCase().includes(q) ||
+      (t.assignedToName ?? "").toLowerCase().includes(q);
     return matchStatus && matchPriority && matchSearch;
   });
 
   function markComplete(id: string) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: "completed" } : t)));
-    setSelectedTask((prev) => (prev && prev.id === id ? { ...prev, status: "completed" } : prev));
+    updateTask.mutate(
+      { id, input: { status: "completed" } },
+      {
+        onSuccess: (updated) => {
+          toast({ title: "Task completed" });
+          setSelectedTask((prev) => (prev && prev.id === id ? updated : prev));
+        },
+        onError: () => toast({ title: "Could not update task", variant: "destructive" }),
+      },
+    );
   }
 
   function handleCreateTask() {
-    const resident = residents.find((r) => r.id === form.residentId);
-    if (!form.title || !resident || !form.assignedTo || !form.dueDate) return;
-    const newTask: Task = {
-      id: `t${Date.now()}`,
-      residentId: resident.id,
-      residentName: resident.name,
-      title: form.title,
-      assignedTo: form.assignedTo,
-      area: resident.residence,
-      status: "pending",
-      dueDate: form.dueDate,
-      priority: form.priority,
-      createdBy: "Sarah Johnson",
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    setForm(emptyForm);
-    setNewOpen(false);
+    if (!form.title || !form.residentId || !form.assignedToId) return;
+    createTask.mutate(
+      {
+        residentId: form.residentId,
+        title: form.title,
+        assignedToId: form.assignedToId,
+        priority: form.priority,
+        dueDate: form.dueDate || undefined,
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Task created" });
+          setForm(emptyForm);
+          setNewOpen(false);
+        },
+        onError: (err) =>
+          toast({
+            title: "Could not create task",
+            description: err instanceof Error ? err.message : undefined,
+            variant: "destructive",
+          }),
+      },
+    );
   }
 
   return (
@@ -114,6 +142,13 @@ export default function Tasks() {
         Showing {filtered.length} of {tasks.length} tasks
       </p>
 
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={filtered.length === 0}
+        emptyMessage="No tasks found."
+        errorMessage="Couldn't load tasks."
+      >
       <div className="space-y-3">
         {filtered.map((task) => (
           <Card
@@ -136,10 +171,10 @@ export default function Tasks() {
                       <User className="h-3 w-3" /> {task.residentName}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <User className="h-3 w-3" /> {task.assignedTo}
+                      <User className="h-3 w-3" /> {task.assignedToName ?? "Unassigned"}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> Due: {task.dueDate}
+                      <Clock className="h-3 w-3" /> Due: {fmtDate(task.dueDate)}
                     </span>
                   </div>
                 </div>
@@ -153,12 +188,8 @@ export default function Tasks() {
             </CardContent>
           </Card>
         ))}
-        {filtered.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No tasks found.
-          </p>
-        )}
       </div>
+      </QueryState>
 
       <TaskDetailDialog
         task={selectedTask}
@@ -191,18 +222,21 @@ export default function Tasks() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs">Assign To</Label>
-                <Select value={form.assignedTo} onValueChange={(v) => setForm({ ...form, assignedTo: v })}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Choose a role" /></SelectTrigger>
+                <Select
+                  value={form.assignedToId}
+                  onValueChange={(v) => setForm({ ...form, assignedToId: v })}
+                >
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Choose staff" /></SelectTrigger>
                   <SelectContent>
-                    {roles.map((r) => (
-                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    {staff.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className="text-xs">Priority</Label>
-                <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as Task["priority"] })}>
+                <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as TaskDTO["priority"] })}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Low">Low</SelectItem>
@@ -220,7 +254,9 @@ export default function Tasks() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setNewOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreateTask}>Create Task</Button>
+            <Button onClick={handleCreateTask} disabled={createTask.isPending}>
+              {createTask.isPending ? "Creating…" : "Create Task"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
