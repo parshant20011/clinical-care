@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, BedDouble, Calendar, Clock } from "lucide-react";
-import { wounds } from "@/data/mockData";
+import { useWounds } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+
+const formatDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString("en-AU") : "—";
 
 const statusStyles: Record<string, string> = {
   active: "bg-red-50 text-red-600 border-transparent",
@@ -24,7 +28,7 @@ interface WoundsTabProps {
 }
 
 export default function WoundsTab({ residentId }: WoundsTabProps) {
-  const residentWounds = wounds.filter((w) => w.residentId === residentId);
+  const { data: residentWounds = [], isLoading, isError } = useWounds(residentId);
 
   return (
     <div className="space-y-4">
@@ -36,11 +40,12 @@ export default function WoundsTab({ residentId }: WoundsTabProps) {
         </Button>
       </div>
 
-      {residentWounds.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          No active wounds recorded.
-        </p>
-      ) : (
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={residentWounds.length === 0}
+        emptyMessage="No active wounds recorded."
+      >
         <div className="space-y-3">
           {residentWounds.map((wound) => (
             <div key={wound.id} className="border rounded-lg p-4">
@@ -59,11 +64,11 @@ export default function WoundsTab({ residentId }: WoundsTabProps) {
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      Discovered: {wound.startedDate}
+                      Discovered: {formatDate(wound.startedDate)}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      Last assessed: {wound.lastReview}
+                      Last assessed: {formatDate(wound.lastReview)}
                     </span>
                   </div>
                 </div>
@@ -71,7 +76,7 @@ export default function WoundsTab({ residentId }: WoundsTabProps) {
             </div>
           ))}
         </div>
-      )}
+      </QueryState>
     </div>
   );
 }

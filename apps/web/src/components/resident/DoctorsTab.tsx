@@ -6,8 +6,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Search, Phone, Mail, Building2, Star } from "lucide-react";
-import { residentDoctors, type ResidentDoctor } from "@/data/mockData";
-import type { ResidentDetail } from "@clinical/shared";
+import type { ResidentDetail, ResidentDoctorDTO } from "@clinical/shared";
+import { useResidentDoctors } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -17,11 +18,12 @@ interface DoctorsTabProps {
 
 export default function DoctorsTab({ resident }: DoctorsTabProps) {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<ResidentDoctor | null>(null);
+  const [selected, setSelected] = useState<ResidentDoctorDTO | null>(null);
 
-  const doctors = residentDoctors
-    .filter((d) => d.residentId === resident.id)
-    .filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
+  const { data: allDoctors = [], isLoading, isError } = useResidentDoctors(resident.id);
+  const doctors = allDoctors.filter((d) =>
+    d.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <div className="space-y-4">
@@ -43,6 +45,13 @@ export default function DoctorsTab({ resident }: DoctorsTabProps) {
         />
       </div>
 
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={doctors.length === 0}
+        emptyMessage="No doctors found."
+        errorMessage="Couldn't load doctors."
+      >
       <div className="space-y-3">
         {doctors.map((doc) => (
           <div
@@ -92,10 +101,8 @@ export default function DoctorsTab({ resident }: DoctorsTabProps) {
             </div>
           </div>
         ))}
-        {doctors.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">No doctors found.</p>
-        )}
       </div>
+      </QueryState>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
         <DialogContent>

@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Activity, Droplet, Heart, Plus, LineChart as LineChartIcon } from "lucide-react";
-import { vitalReadings, weightReadings, chartBglReadings, behaviorReadings } from "@/data/mockData";
+import { useVitals } from "@/services/clinical";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -34,10 +34,21 @@ interface ChartsTabProps {
 export default function ChartsTab({ residentId }: ChartsTabProps) {
   const [active, setActive] = useState<ChartKey>("vitals");
 
-  const vitals = vitalReadings.filter((v) => v.residentId === residentId);
-  const weights = weightReadings.filter((w) => w.residentId === residentId);
-  const bgl = chartBglReadings.filter((b) => b.residentId === residentId);
-  const behavior = behaviorReadings.filter((b) => b.residentId === residentId);
+  const { data: rawVitals = [] } = useVitals(residentId);
+
+  // Vitals come from the API. Weight / BGL / behaviour charts have no backing
+  // tables in the schema yet, so they render their "no data" state until those
+  // resources are modelled.
+  const vitals = rawVitals.map((v) => ({
+    ...v,
+    date: new Date(v.recordedAt).toLocaleDateString("en-AU", {
+      day: "2-digit",
+      month: "short",
+    }),
+  }));
+  const weights: { week: string; value: number }[] = [];
+  const bgl: { date: string; value: number }[] = [];
+  const behavior: { date: string; incidents: number }[] = [];
   const latestVital = vitals.at(-1);
 
   return (

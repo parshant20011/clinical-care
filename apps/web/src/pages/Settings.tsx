@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,11 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { User, Shield, Bell, Palette, Pencil, Trash2, Plus } from "lucide-react";
-import { staffUsers as initialStaff, type StaffUser } from "@/data/mockData";
+import { ROLE_LABELS, type Role, type StaffDTO } from "@clinical/shared";
+import { useStaff } from "@/services/tasks";
 import { toast } from "@/hooks/use-toast";
 
-const emptyStaff = { name: "", email: "", role: "Carer", shift: "Morning" as StaffUser["shift"] };
+const emptyStaff = { name: "", email: "", role: "Carer", shift: "Morning" };
 
 const tabTriggerClass =
   "gap-1.5 sm:gap-2 rounded-lg border border-transparent bg-slate-100 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-muted-foreground shadow-none data-[state=active]:border-slate-200 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm";
@@ -50,9 +51,18 @@ export default function Settings() {
     shift: "Morning",
   });
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
-  const [staff, setStaff] = useState<StaffUser[]>(initialStaff);
+
+  // Staff are READ from the API. Add/edit/delete below are still client-only —
+  // full User & Access Management (write endpoints) is a later scope item, so
+  // changes here don't persist yet.
+  const { data: apiStaff } = useStaff();
+  const [staff, setStaff] = useState<StaffDTO[]>([]);
+  useEffect(() => {
+    if (apiStaff) setStaff(apiStaff);
+  }, [apiStaff]);
+
   const [addUserOpen, setAddUserOpen] = useState(false);
-  const [editUser, setEditUser] = useState<StaffUser | null>(null);
+  const [editUser, setEditUser] = useState<StaffDTO | null>(null);
   const [newStaff, setNewStaff] = useState(emptyStaff);
   const [notifications, setNotifications] = useState({
     taskAssignments: true,
@@ -72,7 +82,7 @@ export default function Settings() {
 
   function handleAddStaff() {
     if (!newStaff.name || !newStaff.email) return;
-    setStaff((prev) => [...prev, { id: `u${Date.now()}`, ...newStaff }]);
+    setStaff((prev) => [...prev, { id: `u${Date.now()}`, active: true, ...newStaff }]);
     setNewStaff(emptyStaff);
     setAddUserOpen(false);
     toast({ title: "User added", description: `${newStaff.name} has been added to the team.` });
@@ -279,10 +289,12 @@ export default function Settings() {
                         <TableCell className="text-sm text-muted-foreground py-3.5 hidden sm:table-cell">{s.email}</TableCell>
                         <TableCell className="py-3.5">
                           <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 font-normal border-0 shadow-none whitespace-nowrap">
-                            {s.role}
+                            {ROLE_LABELS[s.role as Role] ?? s.role}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm py-3.5 hidden md:table-cell">{s.shift}</TableCell>
+                        <TableCell className="text-sm py-3.5 hidden md:table-cell capitalize">
+                          {s.shift ? s.shift.toLowerCase() : "—"}
+                        </TableCell>
                         <TableCell className="py-3.5">
                           <div className="flex items-center justify-end gap-1">
                             <Button
@@ -442,7 +454,7 @@ export default function Settings() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm">Shift</Label>
-                <Select value={newStaff.shift} onValueChange={(v) => setNewStaff({ ...newStaff, shift: v as StaffUser["shift"] })}>
+                <Select value={newStaff.shift} onValueChange={(v) => setNewStaff({ ...newStaff, shift: v as string })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Morning">Morning</SelectItem>
@@ -489,7 +501,7 @@ export default function Settings() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-sm">Shift</Label>
-                  <Select value={editUser.shift} onValueChange={(v) => setEditUser({ ...editUser, shift: v as StaffUser["shift"] })}>
+                  <Select value={editUser.shift ?? undefined} onValueChange={(v) => setEditUser({ ...editUser, shift: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Morning">Morning</SelectItem>

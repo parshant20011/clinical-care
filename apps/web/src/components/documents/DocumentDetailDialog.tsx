@@ -1,11 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FileText, Eye, Download, Trash2 } from "lucide-react";
-import type { FacilityDocument } from "@/data/mockData";
+import type { FacilityDocumentDTO } from "@clinical/shared";
 import { toast } from "@/hooks/use-toast";
 
 interface DocumentDetailDialogProps {
-  doc: FacilityDocument | null;
+  doc: FacilityDocumentDTO | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete: (id: string) => void;

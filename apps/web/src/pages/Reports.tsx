@@ -10,7 +10,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   LineChart, Line, Legend,
 } from "recharts";
-import { residents, tasks, wounds, weeklyActivity } from "@/data/mockData";
+import { useResidents } from "@/services/residents";
+import { useTasks, useDashboardStats } from "@/services/tasks";
 import StatsCard from "@/components/dashboard/StatsCard";
 import { toast } from "@/hooks/use-toast";
 import { Users, ClipboardList, BedDouble, FileSearch } from "lucide-react";
@@ -60,6 +61,10 @@ export default function Reports() {
   const [range, setRange] = useState("this-week");
   const [reportType, setReportType] = useState("all");
 
+  const { data: residents = [] } = useResidents();
+  const { data: tasks = [] } = useTasks();
+  const { data: stats } = useDashboardStats();
+
   const careLevelData = (["Low", "Medium", "High"] as const).map((level) => ({
     name: level,
     value: residents.filter((r) => r.careLevel === level).length,
@@ -70,6 +75,17 @@ export default function Reports() {
     count: tasks.filter((t) => t.status === status).length,
     fill: statusColors[status],
   }));
+
+  // Weekly activity, derived from real task due-dates (the old mock array had no
+  // DB backing). Buckets this week's tasks by weekday.
+  const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const weeklyActivity = DAYS.map((day) => ({ day, tasks: 0, notes: 0, wounds: 0 }));
+  for (const t of tasks) {
+    if (!t.dueDate) continue;
+    const jsDay = new Date(t.dueDate).getDay(); // 0=Sun
+    const idx = jsDay === 0 ? 6 : jsDay - 1; // shift so Mon=0
+    weeklyActivity[idx].tasks += 1;
+  }
 
   return (
     <div className="space-y-5">
@@ -113,10 +129,10 @@ export default function Reports() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="Active Residents" value={residents.length} icon={Users} iconColor="text-blue-600" />
+        <StatsCard title="Active Residents" value={stats?.totalResidents ?? residents.length} icon={Users} iconColor="text-blue-600" />
         <StatsCard title="Pending Tasks" value={tasks.filter((t) => t.status === "pending").length} icon={ClipboardList} iconColor="text-orange-600" />
-        <StatsCard title="Active Wounds" value={wounds.filter((w) => w.status === "active").length} icon={BedDouble} iconColor="text-red-600" />
-        <StatsCard title="Pending Assessments" value={tasks.filter((t) => t.status === "pending").length} icon={FileSearch} iconColor="text-blue-600" />
+        <StatsCard title="Active Wounds" value={stats?.activeWounds ?? 0} icon={BedDouble} iconColor="text-red-600" />
+        <StatsCard title="Pending Assessments" value={stats?.pendingAssessments ?? 0} icon={FileSearch} iconColor="text-blue-600" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

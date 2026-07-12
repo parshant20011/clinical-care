@@ -4,7 +4,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Hospital, Home, ArrowLeftRight } from "lucide-react";
-import { movements, movementTypes } from "@/data/mockData";
+import { movementTypes } from "@clinical/shared";
+import { useMovements } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -23,9 +25,11 @@ export default function MovementTab({ residentId }: MovementTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [type, setType] = useState("");
 
-  const residentMovements = movements
-    .filter((m) => m.residentId === residentId)
-    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const { data: movements = [], isLoading, isError } = useMovements(residentId);
+
+  const residentMovements = [...movements].sort((a, b) =>
+    (a.date + a.time).localeCompare(b.date + b.time)
+  );
 
   const handleSave = () => {
     if (!type) return;
@@ -90,11 +94,12 @@ export default function MovementTab({ residentId }: MovementTabProps) {
         </div>
       )}
 
-      {residentMovements.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          No movements recorded.
-        </p>
-      ) : (
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={residentMovements.length === 0}
+        emptyMessage="No movements recorded."
+      >
         <div className="space-y-0">
           {residentMovements.map((m, i) => {
             const { Icon, bg, color } = iconFor(m.type);
@@ -112,7 +117,7 @@ export default function MovementTab({ residentId }: MovementTabProps) {
                     <div>
                       <p className="text-sm font-semibold">{m.type}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {m.date} · {m.time}
+                        {new Date(m.date).toLocaleDateString("en-AU")} · {m.time}
                       </p>
                       <p className="text-sm mt-1.5">{m.note}</p>
                     </div>
@@ -123,7 +128,7 @@ export default function MovementTab({ residentId }: MovementTabProps) {
             );
           })}
         </div>
-      )}
+      </QueryState>
     </div>
   );
 }

@@ -9,7 +9,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Calendar, User } from "lucide-react";
-import { assessmentRecords, assessmentTypeOptions } from "@/data/mockData";
+import { assessmentTypeOptions } from "@clinical/shared";
+import { useAssessments } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { toast } from "@/hooks/use-toast";
 
 interface AssessmentTabProps {
@@ -22,7 +24,7 @@ export default function AssessmentTab({ residentId }: AssessmentTabProps) {
   const [assessor, setAssessor] = useState("");
   const [notes, setNotes] = useState("");
 
-  const records = assessmentRecords.filter((a) => a.residentId === residentId);
+  const { data: records = [], isLoading, isError } = useAssessments(residentId);
 
   const handleSchedule = () => {
     if (!type) return;
@@ -44,12 +46,13 @@ export default function AssessmentTab({ residentId }: AssessmentTabProps) {
       </div>
 
       <div className="space-y-3">
-        {records.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No assessments recorded yet.
-          </p>
-        ) : (
-          records.map((a) => (
+        <QueryState
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={records.length === 0}
+          emptyMessage="No assessments recorded yet."
+        >
+          {records.map((a) => (
             <div key={a.id} className="border rounded-lg p-4">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                 <p className="text-sm font-semibold">{a.name}</p>
@@ -60,7 +63,7 @@ export default function AssessmentTab({ residentId }: AssessmentTabProps) {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {a.date}
+                  {new Date(a.date).toLocaleDateString("en-AU")}
                 </span>
                 <span className="flex items-center gap-1">
                   <User className="h-3 w-3" />
@@ -70,8 +73,8 @@ export default function AssessmentTab({ residentId }: AssessmentTabProps) {
               </div>
               <p className="text-sm mt-2 text-muted-foreground">{a.summary}</p>
             </div>
-          ))
-        )}
+          ))}
+        </QueryState>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

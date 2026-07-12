@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
-import { residentCards, anaccDetails } from "@/data/mockData";
 import type { ResidentDetail } from "@clinical/shared";
+import { useResidentCards, useAnacc } from "@/services/clinical";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -18,8 +18,8 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function CardsTab({ resident }: CardsTabProps) {
-  const cards = residentCards.filter((c) => c.residentId === resident.id);
-  const anacc = anaccDetails.find((a) => a.residentId === resident.id);
+  const { data: cards = [] } = useResidentCards(resident.id);
+  const { data: anacc } = useAnacc(resident.id);
 
   return (
     <div className="space-y-4">

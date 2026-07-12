@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Clock, User } from "lucide-react";
-import { checklists } from "@/data/mockData";
+import type { ChecklistDTO } from "@clinical/shared";
+import { useChecklists } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { cn } from "@/lib/utils";
 
 const checklistTypes = [
@@ -23,12 +25,19 @@ interface ChecklistTabProps {
 export default function ChecklistTab({ residentId }: ChecklistTabProps) {
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
-  const [localChecklists, setLocalChecklists] = useState(() =>
-    checklists
-      .filter((c) => c.residentId === residentId)
-      .map((c) => ({ ...c, items: c.items.map((i) => ({ ...i })) }))
-      .sort((a, b) => b.date.localeCompare(a.date))
-  );
+  const { data: checklists, isLoading, isError } = useChecklists(residentId);
+  const [localChecklists, setLocalChecklists] = useState<ChecklistDTO[]>([]);
+
+  // Item toggling is client-only for now (no API write yet), so the query data is
+  // copied into local state — deep-cloning items so toggles don't mutate the cache.
+  useEffect(() => {
+    if (!checklists) return;
+    setLocalChecklists(
+      checklists
+        .map((c) => ({ ...c, items: c.items.map((i) => ({ ...i })) }))
+        .sort((a, b) => b.date.localeCompare(a.date))
+    );
+  }, [checklists]);
 
   const toggleItem = (checklistId: string, itemId: string) => {
     setLocalChecklists((prev) =>
@@ -86,7 +95,12 @@ export default function ChecklistTab({ residentId }: ChecklistTabProps) {
         })}
       </div>
 
-      {localChecklists.length > 0 && (
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={localChecklists.length === 0}
+        emptyMessage="No checklists recorded yet."
+      >
         <div className="space-y-3">
           <p className="text-sm font-semibold">Recent Checklists</p>
           {localChecklists.map((cl) => {
@@ -109,7 +123,7 @@ export default function ChecklistTab({ residentId }: ChecklistTabProps) {
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {cl.date}
+                        {new Date(cl.date).toLocaleDateString("en-AU")}
                       </span>
                       {cl.completedBy && (
                         <span className="flex items-center gap-1">
@@ -152,7 +166,7 @@ export default function ChecklistTab({ residentId }: ChecklistTabProps) {
             );
           })}
         </div>
-      )}
+      </QueryState>
     </div>
   );
 }

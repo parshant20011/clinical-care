@@ -1,18 +1,15 @@
-// Seed the database from the web app's existing mock data.
+// Seed the database with demo data.
 //
-// This is the strangler-fig enabler (productionization plan Phase 1/4): the DB
-// starts life containing exactly today's demo data, so the frontend can be
-// migrated off mockData.ts one resource at a time without the app ever looking
-// empty. Everything is created under ONE seed facility to exercise the
-// multi-tenant model.
+// `seed-data.ts` holds the demo fixtures (formerly the frontend's mockData.ts —
+// moved here once the web app was fully migrated to the API, since its only
+// remaining job is seeding). Everything is created under ONE facility to
+// exercise the multi-tenant model.
 //
 // Run:  npm run db:seed -w @clinical/api   (or `prisma db seed`)
 
 import { PrismaClient, Role, Shift } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-// Import the mock arrays straight from the web workspace — single source of
-// demo data until Phase 4 removes them.
 import {
   residents,
   staffUsers,
@@ -30,7 +27,7 @@ import {
   anaccDetails,
   carePathways,
   residentDocuments,
-} from "../../web/src/data/mockData";
+} from "./seed-data";
 
 const prisma = new PrismaClient();
 

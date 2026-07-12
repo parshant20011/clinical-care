@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Waypoints, ChevronRight } from "lucide-react";
-import { carePathways } from "@/data/mockData";
+import { usePathways } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +20,7 @@ interface PathwaysTabProps {
 
 export default function PathwaysTab({ residentId }: PathwaysTabProps) {
   const [openId, setOpenId] = useState<string | null>(null);
-  const pathways = carePathways.filter((p) => p.residentId === residentId);
+  const { data: pathways = [], isLoading, isError } = usePathways(residentId);
 
   return (
     <div className="space-y-4">
@@ -31,11 +32,12 @@ export default function PathwaysTab({ residentId }: PathwaysTabProps) {
         </Button>
       </div>
 
-      {pathways.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          No care pathways recorded yet.
-        </p>
-      ) : (
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={pathways.length === 0}
+        emptyMessage="No care pathways recorded yet."
+      >
       <div className="space-y-3">
         {pathways.map((p) => {
           const percent = p.totalSteps > 0 ? Math.round((p.completedSteps / p.totalSteps) * 100) : 0;
@@ -77,7 +79,7 @@ export default function PathwaysTab({ residentId }: PathwaysTabProps) {
           );
         })}
       </div>
-      )}
+      </QueryState>
     </div>
   );
 }

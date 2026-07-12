@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { tasks } from "@/data/mockData";
+import { useTasks } from "@/services/tasks";
+import QueryState from "@/components/QueryState";
 import { cn } from "@/lib/utils";
 
 const priorityConfig = {
@@ -20,6 +21,7 @@ const statusConfig = {
 
 export default function TaskOverview() {
   const navigate = useNavigate();
+  const { data: tasks = [], isLoading, isError } = useTasks();
   const activeTasks = tasks.filter((t) => t.status !== "completed").slice(0, 4);
 
   return (
@@ -36,6 +38,13 @@ export default function TaskOverview() {
         </Button>
       </CardHeader>
       <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+        <QueryState
+          isLoading={isLoading}
+          isError={isError}
+          isEmpty={activeTasks.length === 0}
+          emptyMessage="No active tasks."
+          errorMessage="Couldn't load tasks."
+        >
         <div className="space-y-3">
           {activeTasks.map((task) => {
             const status = statusConfig[task.status];
@@ -47,7 +56,9 @@ export default function TaskOverview() {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold leading-tight">{task.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{task.residentName}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{task.assignedTo}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {task.assignedToName ?? "Unassigned"}
+                  </p>
                 </div>
                 <div className="flex flex-row sm:flex-col items-center sm:items-end gap-1.5 shrink-0">
                   <span
@@ -71,6 +82,7 @@ export default function TaskOverview() {
             );
           })}
         </div>
+        </QueryState>
       </CardContent>
     </Card>
   );

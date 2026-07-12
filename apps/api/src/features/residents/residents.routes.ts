@@ -6,6 +6,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 import { auditMutations } from "../../middleware/audit.js";
 import * as service from "./residents.service.js";
 import progressNotesRouter from "../progressNotes/progressNotes.routes.js";
+import clinicalRouter from "../clinical/clinical.routes.js";
 
 const router = Router();
 
@@ -46,5 +47,8 @@ router.post(
 
 // Nested resident-scoped clinical resources.
 router.use("/:residentId/progress-notes", progressNotesRouter);
+// Wounds, care plans, checklists, movements, assessments, pathways, doctors,
+// contacts, cards, vitals, documents, anacc — all registered from one router.
+router.use("/:residentId", clinicalRouter);
 
 export default router;

@@ -7,6 +7,10 @@ import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 import authRoutes from "./features/auth/auth.routes.js";
 import residentsRoutes from "./features/residents/residents.routes.js";
+import tasksRoutes from "./features/tasks/tasks.routes.js";
+import staffRoutes from "./features/staff/staff.routes.js";
+import dashboardRoutes from "./features/dashboard/dashboard.routes.js";
+import documentsRoutes from "./features/documents/documents.routes.js";
 
 // Build the Express app WITHOUT starting it — so tests (supertest) can import
 // `app` directly, and server.ts can add listening.
@@ -34,6 +38,10 @@ export function createApp() {
   // Feature routers.
   app.use("/api/auth", authRoutes);
   app.use("/api/residents", residentsRoutes);
+  app.use("/api/tasks", tasksRoutes);
+  app.use("/api/staff", staffRoutes);
+  app.use("/api/dashboard", dashboardRoutes);
+  app.use("/api/documents", documentsRoutes);
 
   // 404 for unknown routes, then the central error handler (must be last).
   app.use(notFoundHandler);

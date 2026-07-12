@@ -11,22 +11,30 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Search, Upload, FileText } from "lucide-react";
-import { facilityDocuments as initialDocuments, type FacilityDocument } from "@/data/mockData";
+import type { FacilityDocumentDTO } from "@clinical/shared";
+import { useFacilityDocuments } from "@/services/documents";
+import QueryState from "@/components/QueryState";
 import DocumentDetailDialog from "@/components/documents/DocumentDetailDialog";
 
-const categories = [...new Set(initialDocuments.map((d) => d.category))];
-const types: FacilityDocument["type"][] = ["PDF", "Word", "Excel", "Image"];
+const types = ["PDF", "Word", "Excel", "Image"];
 
-const emptyForm = { name: "", category: categories[0], type: "PDF" as FacilityDocument["type"] };
+const emptyForm = { name: "", category: "Clinical", type: "PDF" };
 
 export default function Documents() {
-  const [documents, setDocuments] = useState<FacilityDocument[]>(initialDocuments);
+  // Documents are READ from the API. Upload/delete below are still client-only —
+  // real file storage is a later scope item, so changes here don't persist.
+  const { data: apiDocs, isLoading, isError } = useFacilityDocuments();
+  const [localDocs, setLocalDocs] = useState<FacilityDocumentDTO[] | null>(null);
+  const documents = localDocs ?? apiDocs ?? [];
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [type, setType] = useState("all");
-  const [selected, setSelected] = useState<FacilityDocument | null>(null);
+  const [selected, setSelected] = useState<FacilityDocumentDTO | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+
+  const categories = [...new Set(documents.map((d) => d.category))];
 
   const filtered = documents.filter((d) => {
     const matchSearch = d.name.toLowerCase().includes(search.toLowerCase());
@@ -37,22 +45,22 @@ export default function Documents() {
 
   function handleUpload() {
     if (!form.name) return;
-    const newDoc: FacilityDocument = {
+    const newDoc: FacilityDocumentDTO = {
       id: `d${Date.now()}`,
       name: form.name,
       category: form.category,
       type: form.type,
       size: "—",
-      uploadDate: new Date().toISOString().slice(0, 10),
+      uploadDate: new Date().toISOString(),
       uploadedBy: "Admin",
     };
-    setDocuments((prev) => [newDoc, ...prev]);
+    setLocalDocs([newDoc, ...documents]);
     setForm(emptyForm);
     setUploadOpen(false);
   }
 
   function handleDelete(id: string) {
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
+    setLocalDocs(documents.filter((d) => d.id !== id));
     setSelected(null);
   }
 
@@ -96,6 +104,13 @@ export default function Documents() {
         Showing {filtered.length} documents
       </p>
 
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={filtered.length === 0}
+        emptyMessage="No documents match your search."
+        errorMessage="Couldn't load documents."
+      >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((doc) => (
           <Card
@@ -114,18 +129,14 @@ export default function Documents() {
                   <Badge variant="outline" className="text-xs">{doc.type}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {doc.size} · {doc.uploadDate}
+                  {doc.size} · {new Date(doc.uploadDate).toLocaleDateString("en-AU")}
                 </p>
               </div>
             </CardContent>
           </Card>
         ))}
-        {filtered.length === 0 && (
-          <p className="col-span-full text-sm text-muted-foreground text-center py-8">
-            No documents match your search.
-          </p>
-        )}
       </div>
+      </QueryState>
 
       <DocumentDetailDialog
         doc={selected}
@@ -158,7 +169,7 @@ export default function Documents() {
               </div>
               <div>
                 <Label className="text-xs">Type</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as FacilityDocument["type"] })}>
+                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {types.map((t) => (

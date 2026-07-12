@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Task } from "@/data/mockData";
+import type { TaskDTO } from "@clinical/shared";
 import { cn } from "@/lib/utils";
 
 const statusColors = {
@@ -12,7 +12,7 @@ const statusColors = {
 };
 
 interface TaskDetailDialogProps {
-  task: Task | null;
+  task: TaskDTO | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onMarkComplete: (id: string) => void;
@@ -44,15 +44,17 @@ export default function TaskDetailDialog({ task, open, onOpenChange, onMarkCompl
           </div>
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs text-muted-foreground">Assigned To</p>
-            <p className="text-sm font-medium">{task.assignedTo}</p>
+            <p className="text-sm font-medium">{task.assignedToName ?? "Unassigned"}</p>
           </div>
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs text-muted-foreground">Due Date</p>
-            <p className="text-sm font-medium">{task.dueDate}</p>
+            <p className="text-sm font-medium">
+              {task.dueDate ? new Date(task.dueDate).toLocaleDateString("en-AU") : "—"}
+            </p>
           </div>
           <div className="rounded-md bg-muted p-3">
             <p className="text-xs text-muted-foreground">Created By</p>
-            <p className="text-sm font-medium">{task.createdBy}</p>
+            <p className="text-sm font-medium">{task.createdBy ?? "—"}</p>
           </div>
         </div>
         <DialogFooter>

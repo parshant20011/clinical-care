@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Phone, Mail, Star } from "lucide-react";
-import { residentContacts } from "@/data/mockData";
 import type { ResidentDetail } from "@clinical/shared";
+import { useResidentContacts } from "@/services/clinical";
+import QueryState from "@/components/QueryState";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +12,7 @@ interface ContactsTabProps {
 }
 
 export default function ContactsTab({ resident }: ContactsTabProps) {
-  const contacts = residentContacts.filter((c) => c.residentId === resident.id);
+  const { data: contacts = [], isLoading, isError } = useResidentContacts(resident.id);
 
   return (
     <div className="space-y-4">
@@ -23,6 +24,13 @@ export default function ContactsTab({ resident }: ContactsTabProps) {
         </Button>
       </div>
 
+      <QueryState
+        isLoading={isLoading}
+        isError={isError}
+        isEmpty={contacts.length === 0}
+        emptyMessage="No contacts found."
+        errorMessage="Couldn't load contacts."
+      >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {contacts.map((contact) => (
           <div
@@ -58,10 +66,8 @@ export default function ContactsTab({ resident }: ContactsTabProps) {
             </div>
           </div>
         ))}
-        {contacts.length === 0 && (
-          <p className="col-span-2 text-sm text-muted-foreground text-center py-8">No contacts found.</p>
-        )}
       </div>
+      </QueryState>
     </div>
   );
 }

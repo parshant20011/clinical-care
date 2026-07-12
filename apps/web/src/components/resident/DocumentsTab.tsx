@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Upload, FileText, Eye, Download } from "lucide-react";
-import { residentDocuments } from "@/data/mockData";
+import { useResidentDocuments } from "@/services/clinical";
 import { toast } from "@/hooks/use-toast";
 
 interface DocumentsTabProps {
@@ -12,9 +12,10 @@ interface DocumentsTabProps {
 export default function DocumentsTab({ residentId }: DocumentsTabProps) {
   const [search, setSearch] = useState("");
 
-  const docs = residentDocuments
-    .filter((d) => d.residentId === residentId)
-    .filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
+  const { data: allDocs = [] } = useResidentDocuments(residentId);
+  const docs = allDocs.filter((d) =>
+    d.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <div className="space-y-4">
@@ -50,7 +51,8 @@ export default function DocumentsTab({ residentId }: DocumentsTabProps) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{doc.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {doc.category} · {doc.size} · Uploaded {doc.uploadDate}
+                  {doc.category} · {doc.size} · Uploaded{" "}
+                  {new Date(doc.uploadDate).toLocaleDateString("en-AU")}
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">

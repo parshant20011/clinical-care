@@ -2,9 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, AlertTriangle, User, Calendar, Weight, Loader2 } from "lucide-react";
-import { residentDoctors, residentContacts, weightReadings, anaccDetails } from "@/data/mockData";
+import { ArrowLeft, AlertTriangle, User, Calendar, Loader2 } from "lucide-react";
 import { useResident } from "@/services/residents";
+import { useResidentDoctors, useResidentContacts, useAnacc } from "@/services/clinical";
 import ProgressNotesTab from "@/components/resident/ProgressNotesTab";
 import ChecklistTab from "@/components/resident/ChecklistTab";
 import AssignTaskTab from "@/components/resident/AssignTaskTab";
@@ -33,6 +33,14 @@ export default function ResidentProfile() {
   const navigate = useNavigate();
   const { data: resident, isLoading, isError } = useResident(id);
 
+  // Header sub-resources. Hooks must run unconditionally, so they're called
+  // before the loading/error early-returns below (they no-op when id is empty).
+  const { data: doctors = [] } = useResidentDoctors(id ?? "");
+  const { data: contacts = [] } = useResidentContacts(id ?? "");
+  const { data: anacc } = useAnacc(id ?? "");
+  const primaryDoctor = doctors.find((d) => d.primary);
+  const primaryContact = contacts.find((c) => c.primary);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24 text-muted-foreground">
@@ -52,13 +60,6 @@ export default function ResidentProfile() {
     );
   }
 
-  // These sub-resources still come from mock data — they are migrated to the
-  // API in later slices of the strangler-fig rollout, and degrade gracefully
-  // (undefined) until then.
-  const primaryDoctor = residentDoctors.find((d) => d.residentId === resident.id && d.primary);
-  const primaryContact = residentContacts.find((c) => c.residentId === resident.id && c.primary);
-  const latestWeight = weightReadings.filter((w) => w.residentId === resident.id).at(-1);
-  const anacc = anaccDetails.find((a) => a.residentId === resident.id);
 
   return (
     <div className="space-y-5">
@@ -97,12 +98,6 @@ export default function ResidentProfile() {
                   <Calendar className="h-3.5 w-3.5" />
                   Admitted {new Date(resident.dateOfAdmission).toLocaleDateString("en-AU")}
                 </span>
-                {latestWeight && (
-                  <span className="flex items-center gap-1.5">
-                    <Weight className="h-3.5 w-3.5" />
-                    {latestWeight.value} kg
-                  </span>
-                )}
               </div>
             </div>
           </div>

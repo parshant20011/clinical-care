@@ -332,3 +332,196 @@ export interface ProgressNoteDTO {
   authorId: string | null;
   createdAt: string;
 }
+
+export interface StaffDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  shift: string | null;
+  active: boolean;
+}
+
+export interface TaskDTO {
+  id: string;
+  residentId: string;
+  residentName: string;
+  title: string;
+  assignedToId: string | null;
+  assignedToName: string | null;
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  status: "pending" | "in_progress" | "completed" | "overdue";
+  dueDate: string | null;
+  notes: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+// --- Resident-scoped clinical sub-resources -------------------------------
+
+export interface WoundDTO {
+  id: string;
+  residentId: string;
+  startedDate: string;
+  onAdmission: boolean;
+  woundType: string;
+  location: string;
+  dressingProduct: string | null;
+  nextDressing: string | null;
+  lastReview: string | null;
+  nextReview: string | null;
+  status: "active" | "healing" | "healed" | "archived";
+}
+
+export interface CarePlanDTO {
+  id: string;
+  residentId: string;
+  type: string;
+  observations: string;
+  goals: string;
+  interventions: string;
+  reviewDate: string;
+  createdBy: string;
+  status: "active" | "archived";
+}
+
+export interface ChecklistItemDTO {
+  id: string;
+  name: string;
+  completed: boolean;
+  completedBy: string | null;
+  completedAt: string | null;
+}
+
+export interface ChecklistDTO {
+  id: string;
+  residentId: string;
+  type: string;
+  date: string;
+  completedBy: string | null;
+  items: ChecklistItemDTO[];
+}
+
+export interface MovementDTO {
+  id: string;
+  residentId: string;
+  date: string;
+  time: string;
+  type: string;
+  note: string;
+  recordedBy: string;
+}
+
+export interface AssessmentDTO {
+  id: string;
+  residentId: string;
+  name: string;
+  date: string;
+  by: string;
+  score: number;
+  summary: string;
+  status: "Completed" | "Scheduled";
+}
+
+export interface CarePathwayDTO {
+  id: string;
+  residentId: string;
+  name: string;
+  totalSteps: number;
+  completedSteps: number;
+  status: "Not Started" | "In Progress" | "Completed";
+}
+
+export interface ResidentDoctorDTO {
+  id: string;
+  residentId: string;
+  name: string;
+  specialty: string;
+  facility: string;
+  phone: string;
+  email: string;
+  primary: boolean;
+}
+
+export interface ContactDTO {
+  id: string;
+  residentId: string;
+  name: string;
+  relationship: string;
+  phone: string;
+  email: string;
+  primary: boolean;
+}
+
+export interface CardDTO {
+  id: string;
+  residentId: string;
+  type: "Medicare Card" | "IHI Card" | "Concession Card" | "DVA Card";
+  number: string;
+  status: "Active" | "Verified" | "Pending" | "N/A";
+  detail: string | null;
+}
+
+export interface VitalReadingDTO {
+  id: string;
+  residentId: string;
+  recordedAt: string;
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+  temperature: number;
+  spo2: number;
+}
+
+export interface AnaccDetailDTO {
+  id: string;
+  residentId: string;
+  fundingClass: string;
+  fundingLevel: "Low" | "Medium" | "High";
+  dailyRate: string;
+  assessmentDate: string;
+  nextReview: string;
+  domainScores: { label: string; score: number; outOf: number }[];
+  ihiNumber: string;
+  ihiVerified: boolean;
+}
+
+export interface ResidentDocumentDTO {
+  id: string;
+  residentId: string;
+  name: string;
+  category: string;
+  size: string;
+  uploadDate: string;
+}
+
+// --- Facility-wide -------------------------------------------------------
+
+export interface FacilityDocumentDTO {
+  id: string;
+  name: string;
+  category: string;
+  type: string;
+  size: string;
+  uploadDate: string;
+  uploadedBy: string;
+}
+
+export interface DashboardStats {
+  totalResidents: number;
+  activeTasks: number;
+  pendingAssessments: number;
+  activeWounds: number;
+  highCare: number;
+  urgentTasks: number;
+}
+
+// A real activity feed, derived from recent clinical records (progress notes,
+// tasks) rather than a hardcoded list.
+export interface ActivityItemDTO {
+  id: string;
+  kind: "note" | "task" | "alert" | "assessment" | "careplan";
+  title: string;
+  author: string;
+  at: string; // ISO timestamp
+}

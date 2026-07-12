@@ -608,8 +608,61 @@ createResident.mutate(input);   // POSTs, then invalidates the cache → list re
 
 <div class="try"><strong>Try it yourself.</strong> Start both: <code>npm run dev -w @clinical/api</code> and <code>npm run dev:web</code>. Open <a href="http://localhost:5173">localhost:5173</a> — you'll be bounced to the login page. Sign in with <code>l.brown@care.com</code> / <code>Password123!</code>. Add a resident… then <strong>hit refresh</strong>. They're still there. Open DevTools → Network and watch the actual <code>/api/residents</code> calls. That's the whole point of the last four phases.</div>
 
+<h3>✅ Phase 4b — migration COMPLETE: <code>mockData.ts</code> is gone</h3>
+<p>Every screen now reads from Postgres. The frontend has <strong>zero</strong> references to mock data — the file that the whole app was built on has been deleted from the web app.</p>
+
+<h4>What was migrated in this pass</h4>
+<table>
+  <tr><th>Area</th><th>Now powered by</th></tr>
+  <tr><td>12 resident clinical tabs (wounds, care plans, checklists, movements, assessments, pathways, doctors, contacts, cards, charts/vitals, documents, AN-ACC)</td><td><code>GET /residents/:id/&lt;resource&gt;</code></td></tr>
+  <tr><td>Tasks page, Assign Task tab, task detail dialog, dashboard task widget</td><td><code>/tasks</code> (list, create, PATCH to complete)</td></tr>
+  <tr><td>Dashboard stat cards</td><td><code>/dashboard/stats</code> — <strong>computed server-side</strong></td></tr>
+  <tr><td>Recent Activity feed</td><td><code>/dashboard/activity</code> — derived from real notes + tasks</td></tr>
+  <tr><td>Settings → staff table, task assignee dropdowns</td><td><code>/staff</code></td></tr>
+  <tr><td>Documents page</td><td><code>/documents</code></td></tr>
+  <tr><td>Reports charts</td><td><code>/residents</code> + <code>/tasks</code> + <code>/dashboard/stats</code></td></tr>
+</table>
+
+<h4>Two patterns worth learning from this pass</h4>
+<p><strong>1. One router for twelve resources.</strong> The 12 clinical sub-resources are all "list, scoped to a resident". Instead of 12 near-identical routers, they're registered from a table:</p>
+<pre><code>const resources = {
+  wounds:      (fid, rid) =&gt; prisma.wound.findMany({ where: { facilityId: fid, residentId: rid } }),
+  "care-plans":(fid, rid) =&gt; prisma.carePlan.findMany({ ... }),
+  // …10 more
+};
+for (const [path, load] of Object.entries(resources)) {
+  router.get(`/${path}`, requirePermission("clinical","read"), async (req,res) =&gt; {
+    await assertResident(facilityId, residentId);   // ← tenant guard, every time
+    res.json({ data: await load(facilityId, residentId) });
+  });
+}</code></pre>
+<p>The <code>assertResident</code> guard runs before every clinical read, so a guessed resident id can never leak another facility's records.</p>
+
+<p><strong>2. Count on the server, not in the browser.</strong> The dashboard used to fetch every resident/task/wound and <code>.filter().length</code> them in React. Now:</p>
+<pre><code>// server — six COUNT queries in parallel, sends back six numbers
+const [totalResidents, activeTasks, …] = await Promise.all([
+  prisma.resident.count({ where: { facilityId } }),
+  prisma.task.count({ where: { facilityId, status: { not: "completed" } } }),
+  …
+]);</code></pre>
+<div class="why"><strong>Why this matters at scale.</strong> With 5 residents, counting in the browser is fine. With 5,000, you'd be shipping megabytes of PHI to the client just to display the number "5000". Counting in the database is both faster <em>and</em> safer — less data leaves the server.</div>
+
+<h4>Static reference data ≠ database data</h4>
+<p>Not everything belongs in Postgres. Four things stayed as code and moved to <code>packages/shared/src/constants.ts</code>: the clinical form templates, the 22 movement types, care-plan categories, and assessment types. They're fixed clinical vocabularies — they don't vary per facility or change at runtime. <em>If a facility ever needs to customise them, they graduate to real tables.</em> Knowing where to draw that line is a real design skill.</p>
+
+<h4>Where the old mock file went</h4>
+<p><code>mockData.ts</code> wasn't deleted outright — it was <strong>moved to <code>apps/api/prisma/seed-data.ts</code></strong>. Its only remaining job is seeding the demo database. The frontend no longer knows it exists.</p>
+
+<h4>Honest gaps (things the UI shows but the schema doesn't model yet)</h4>
+<ul>
+  <li><strong>Weight / BGL / behaviour charts</strong> — only <em>vitals</em> has a table. The other three chart tabs show their "no data recorded" state until those resources are modelled.</li>
+  <li><strong>Staff add/edit/delete and document upload</strong> — the UI still does these client-side only. Real write endpoints (User &amp; Access Management, file storage) are a later scope item, so those changes don't persist.</li>
+  <li><strong>Checklist item toggling</strong> — client-only for now; a write endpoint comes later.</li>
+</ul>
+<div class="try"><strong>Try it.</strong> Log in, create a task on the Tasks page, mark it complete, then refresh — it stays complete. Open a resident and click through all 16 tabs: Doctors, Contacts, Cards, AN-ACC, Pathways, Assessments, Movements, Vitals all come from Postgres now. Check the Network tab: every screen is an <code>/api/…</code> call.</div>
+
 <h3>⏭️ Next: Phases 5–8</h3>
-<p>Finish the migration (remaining tabs/pages → API, then delete <code>mockData.ts</code>), then harden: security polish (MFA, column encryption, read-audit), tests + CI, and deployment to an AU-region host.</p>
+<p>With the migration done, what's left is hardening: security polish (MFA, column encryption for IHI/Medicare, read-access auditing), the missing write endpoints, tests + CI, and deployment to an AU-region host.</p>
 
 <hr>
 <p class="meta">Pair this with <strong>01-security-and-scope.html</strong> for the requirements + security + DB-design view. Both are living documents — update them as the code evolves.</p>

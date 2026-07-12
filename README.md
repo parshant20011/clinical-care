@@ -19,7 +19,7 @@ clinical-care/
 └─ docs/          Security & scope doc + technical learning guide (open in a browser)
 ```
 
-The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status: **Phase 0** (monorepo), **Phase 1** (multi-tenant Postgres + seed), **Phases 2–3** (Express API: JWT-cookie auth, RBAC, tenant scoping, audit logging), and **Phase 4** (frontend wired to the API — login page, route guard, TanStack Query; residents + progress notes now persist) are done and verified. Next: finish migrating the remaining tabs/pages off `mockData.ts`, then hardening, tests/CI, and deployment.
+The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status — **the migration is complete**: monorepo (Phase 0), multi-tenant Postgres + seed (Phase 1), Express API with JWT-cookie auth/RBAC/tenant-scoping/audit (Phases 2–3), and the **frontend fully wired to the API** (Phase 4) with `mockData.ts` deleted. Every screen now reads from Postgres. Next: hardening (MFA, column encryption, read-audit), the remaining write endpoints, tests/CI, and AU-region deployment.
 
 ---
 
@@ -69,7 +69,9 @@ npm run prisma:studio -w @clinical/api         # visual DB browser
 npm run build                                  # typecheck + build all workspaces
 ```
 
-> **Current state:** run **both** the API and the web app. Visit http://localhost:5173 — you'll be redirected to `/login`. Sign in with any seed user (e.g. `l.brown@care.com` / `Password123!`). The **Residents list, resident profile, and Progress Notes now come from Postgres** — add a resident and refresh: it persists. The remaining tabs/pages still read mock data and are being migrated resource-by-resource (they show empty states in the meantime).
+> **Current state:** run **both** the API and the web app. Visit http://localhost:5173 — you'll be redirected to `/login`. Sign in with any seed user (e.g. `l.brown@care.com` / `Password123!`). **Every screen now reads from Postgres** — add a resident or a task and refresh: it persists. There is no mock data left in the frontend.
+>
+> Known gaps (UI exists, schema doesn't model it yet): weight/BGL/behaviour charts show empty states (only vitals is modelled); staff add/edit/delete, document upload, and checklist-item toggling are client-only until their write endpoints land.
 
 Copy `apps/web/.env.example` → `apps/web/.env` (sets `VITE_API_URL`) before running the frontend.
 
