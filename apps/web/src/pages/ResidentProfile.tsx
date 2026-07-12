@@ -2,8 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, AlertTriangle, User, Calendar, Weight } from "lucide-react";
-import { residents, residentDoctors, residentContacts, weightReadings, anaccDetails } from "@/data/mockData";
+import { ArrowLeft, AlertTriangle, User, Calendar, Weight, Loader2 } from "lucide-react";
+import { residentDoctors, residentContacts, weightReadings, anaccDetails } from "@/data/mockData";
+import { useResident } from "@/services/residents";
 import ProgressNotesTab from "@/components/resident/ProgressNotesTab";
 import ChecklistTab from "@/components/resident/ChecklistTab";
 import AssignTaskTab from "@/components/resident/AssignTaskTab";
@@ -30,9 +31,17 @@ const careLevelStyles: Record<string, string> = {
 export default function ResidentProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const resident = residents.find((r) => r.id === id);
+  const { data: resident, isLoading, isError } = useResident(id);
 
-  if (!resident) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (isError || !resident) {
     return (
       <div className="text-center py-20">
         <p className="text-muted-foreground">Resident not found.</p>
@@ -43,6 +52,9 @@ export default function ResidentProfile() {
     );
   }
 
+  // These sub-resources still come from mock data — they are migrated to the
+  // API in later slices of the strangler-fig rollout, and degrade gracefully
+  // (undefined) until then.
   const primaryDoctor = residentDoctors.find((d) => d.residentId === resident.id && d.primary);
   const primaryContact = residentContacts.find((c) => c.residentId === resident.id && c.primary);
   const latestWeight = weightReadings.filter((w) => w.residentId === resident.id).at(-1);
@@ -83,7 +95,7 @@ export default function ResidentProfile() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
-                  Admitted {resident.doa}
+                  Admitted {new Date(resident.dateOfAdmission).toLocaleDateString("en-AU")}
                 </span>
                 {latestWeight && (
                   <span className="flex items-center gap-1.5">
@@ -98,7 +110,7 @@ export default function ResidentProfile() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0 w-full lg:w-auto">
             <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
               <p className="text-xs text-muted-foreground">Doctor</p>
-              <p className="text-sm font-semibold mt-0.5">{primaryDoctor?.name ?? resident.doctor}</p>
+              <p className="text-sm font-semibold mt-0.5">{primaryDoctor?.name ?? "—"}</p>
             </div>
             <div className="bg-muted/50 rounded-lg px-4 py-2.5 min-w-32">
               <p className="text-xs text-muted-foreground">Medicare</p>

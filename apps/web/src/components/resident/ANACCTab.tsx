@@ -5,10 +5,10 @@ import { Progress } from "@/components/ui/progress";
 import { FileText, DollarSign, Calendar, CalendarClock, Pencil, CheckCircle2 } from "lucide-react";
 import { anaccDetails } from "@/data/mockData";
 import { toast } from "@/hooks/use-toast";
-import type { Resident } from "@/data/mockData";
+import type { ResidentDetail } from "@clinical/shared";
 
 interface ANACCTabProps {
-  resident?: Resident;
+  resident?: ResidentDetail;
 }
 
 export default function ANACCTab({ resident }: ANACCTabProps) {

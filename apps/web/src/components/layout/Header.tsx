@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { appNotifications } from "@/data/mockData";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_LABELS, type Role } from "@clinical/shared";
 import { cn } from "@/lib/utils";
-import { useUser, roles } from "@/context/UserContext";
 
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
   "/residents": { title: "Residents", subtitle: "Manage and view all resident information" },
@@ -29,8 +30,10 @@ interface HeaderProps {
 }
 
 export default function Header({ collapsed, onMenuClick }: HeaderProps) {
-  const { name, role, setRole } = useUser();
+  const { user, logout } = useAuth();
   const { pathname } = useLocation();
+  const name = user?.name ?? "";
+  const role = user ? (ROLE_LABELS[user.role as Role] ?? user.role) : "";
   const firstName = name.split(" ")[0];
 
   const meta =
@@ -120,27 +123,20 @@ export default function Header({ collapsed, onMenuClick }: HeaderProps) {
               <ChevronDown className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
-            {roles.map((r) => (
-              <DropdownMenuItem key={r} onClick={() => setRole(r)} className="gap-2">
-                <span
-                  className={cn(
-                    "h-2 w-2 rounded-full shrink-0",
-                    r === role ? "bg-blue-600" : "bg-transparent border border-muted-foreground"
-                  )}
-                />
-                {r}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="flex flex-col">
+              <span>{name}</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {user?.email}
+              </span>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
+            <DropdownMenuItem className="gap-2">
+              <User className="h-4 w-4" />
+              {role}
             </DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={() => void logout()}>
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

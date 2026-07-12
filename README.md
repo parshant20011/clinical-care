@@ -19,7 +19,7 @@ clinical-care/
 └─ docs/          Security & scope doc + technical learning guide (open in a browser)
 ```
 
-The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status: **Phase 0** (monorepo), **Phase 1** (multi-tenant Postgres + seed), and **Phases 2–3** (Express API with JWT-cookie auth, RBAC, tenant scoping, and audit logging) are done and verified. Next: **Phase 4** — wire the React frontend to the API (TanStack Query + login page + route guard).
+The productionization roadmap (mock prototype → real product) lives in `docs/` and in the plan file. Current status: **Phase 0** (monorepo), **Phase 1** (multi-tenant Postgres + seed), **Phases 2–3** (Express API: JWT-cookie auth, RBAC, tenant scoping, audit logging), and **Phase 4** (frontend wired to the API — login page, route guard, TanStack Query; residents + progress notes now persist) are done and verified. Next: finish migrating the remaining tabs/pages off `mockData.ts`, then hardening, tests/CI, and deployment.
 
 ---
 
@@ -69,7 +69,9 @@ npm run prisma:studio -w @clinical/api         # visual DB browser
 npm run build                                  # typecheck + build all workspaces
 ```
 
-> **Current state:** the API (`dev -w @clinical/api`) is live — auth, RBAC, tenant-scoped residents + progress notes, and audit logging all work against Postgres. The frontend (`dev:web`) also runs, but still reads mock data; wiring it to the API (with a login page) is Phase 4. Try the API with: log in via `POST /api/auth/login` (any seed email, password `Password123!`), then `GET /api/residents`.
+> **Current state:** run **both** the API and the web app. Visit http://localhost:5173 — you'll be redirected to `/login`. Sign in with any seed user (e.g. `l.brown@care.com` / `Password123!`). The **Residents list, resident profile, and Progress Notes now come from Postgres** — add a resident and refresh: it persists. The remaining tabs/pages still read mock data and are being migrated resource-by-resource (they show empty states in the meantime).
+
+Copy `apps/web/.env.example` → `apps/web/.env` (sets `VITE_API_URL`) before running the frontend.
 
 > **PowerShell note:** if npm is blocked, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` once, or use `npm.cmd`.
 

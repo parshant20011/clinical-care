@@ -548,8 +548,68 @@ flowchart LR
 curl -b jar.txt localhost:4000/api/residents      # → your 5 residents</code></pre>
 That is the full loop from §10 running for real: <em>browser asks → server authenticates + authorizes → database answers.</em></div>
 
-<h3>⏭️ Next: Phase 4 — wire the frontend to the API</h3>
-<p>The API works, but the React app still reads <code>mockData.ts</code>. Phase 4 adds TanStack Query + an API client and migrates the app one resource at a time (starting with residents), plus a real login page and route guard — replacing the hardcoded user with the live <code>/auth/me</code> identity.</p>
+<h3>✅ Phase 4 — the frontend now talks to the API (data is REAL)</h3>
+<p>The loop from §1 is finally closed: <em>the browser asks, the server decides, the database remembers.</em> Adding a resident in the UI now survives a page refresh, because it's in Postgres — not a JavaScript array.</p>
+
+<h4>What was added</h4>
+<pre><code>apps/web/src/
+├─ lib/apiClient.ts        typed fetch wrapper (credentials: "include")
+├─ context/AuthContext.tsx real user from /auth/me (replaced the hardcoded one)
+├─ components/ProtectedRoute.tsx   route guard
+├─ pages/Login.tsx         react-hook-form + zod (the shared loginSchema)
+└─ services/
+   ├─ residents.ts         useResidents · useResident · useCreateResident
+   └─ progressNotes.ts     useProgressNotes · useCreateProgressNote</code></pre>
+
+<h4>The migration, before → after</h4>
+<pre><code>// BEFORE — a JS array in memory; "adding" a resident vanished on refresh
+const [residents, setResidents] = useState(initialResidents);
+setResidents(prev =&gt; [...prev, newResident]);
+
+// AFTER — real server state
+const { data: residents = [], isLoading, isError } = useResidents();
+createResident.mutate(input);   // POSTs, then invalidates the cache → list refetches</code></pre>
+<div class="why"><strong>Why the JSX barely changed.</strong> Because the API returns DTOs whose field names match what the UI already used (<code>name</code>, <code>room</code>, <code>careLevel</code>…), the table markup is untouched. That's the payoff of putting types in <code>packages/shared</code> back in Phase 0.</div>
+
+<h4>New terms this phase</h4>
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><strong>TanStack Query</strong></td><td>Manages <em>server</em> state: fetching, caching, loading/error flags, refetching. You describe <em>what</em> to fetch; it handles the rest.</td></tr>
+  <tr><td><strong>queryKey</strong></td><td>The cache's label for a piece of data, e.g. <code>["residents"]</code> or <code>["progress-notes", residentId]</code>.</td></tr>
+  <tr><td><strong>Mutation</strong></td><td>A write (POST/PATCH/DELETE). <code>useMutation</code> gives you <code>mutate()</code>, plus <code>isPending</code> for button spinners.</td></tr>
+  <tr><td><strong>Invalidation</strong></td><td><code>invalidateQueries(["residents"])</code> after a create → the list is marked stale and refetches, so the new row appears with no manual refresh.</td></tr>
+  <tr><td><strong>credentials: "include"</strong></td><td>Tells <code>fetch</code> to send the httpOnly auth cookies. Without it, every request would look logged-out.</td></tr>
+  <tr><td><strong>Route guard</strong></td><td><code>ProtectedRoute</code> — checks <code>/auth/me</code>; no user ⇒ <code>&lt;Navigate to="/login" /&gt;</code>. It remembers where you were headed and sends you back after login.</td></tr>
+  <tr><td><strong>zodResolver</strong></td><td>Plugs a zod schema into react-hook-form, so the <em>same</em> <code>loginSchema</code> the API validates with also drives the form's inline errors.</td></tr>
+  <tr><td><strong>Strangler fig</strong></td><td>Migrating resource-by-resource. Migrated components hit the API; the rest still read <code>mockData.ts</code>. The app never fully breaks.</td></tr>
+</table>
+
+<h4>What's migrated vs. still on mock data</h4>
+<table>
+  <tr><th>Migrated to the API ✅</th><th>Still reading mockData (next slices)</th></tr>
+  <tr>
+    <td>Auth (login/logout/me)<br/>Residents list + Add Resident<br/>Resident profile header<br/>Progress Notes tab</td>
+    <td>The other 15 resident tabs<br/>Dashboard, Tasks, Documents, Reports, Settings<br/>(they degrade gracefully — empty states)</td>
+  </tr>
+</table>
+<div class="why"><strong>Why the un-migrated tabs look empty now.</strong> They filter mock arrays by <code>residentId</code>, and residents now have real UUIDs instead of <code>"1"</code>…<code>"5"</code>. So they find no matches and show their "no data yet" states. That's expected mid-migration and disappears as each tab is moved to the API.</div>
+
+<h4>Verified working (real requests)</h4>
+<table>
+  <tr><th>Step</th><th>Result</th></tr>
+  <tr><td>Visit app logged-out → <code>/auth/me</code></td><td><strong>401</strong> → guard redirects to <code>/login</code> ✓</td></tr>
+  <tr><td>Log in</td><td>cookies set; AuthContext gets the user ✓</td></tr>
+  <tr><td>Residents list</td><td>5 residents from Postgres ✓</td></tr>
+  <tr><td>Add "Ada Lovelace"</td><td><strong>201</strong> persisted ✓</td></tr>
+  <tr><td><strong>Refetch (= refresh the page)</strong></td><td><strong>6 residents — Ada is still there</strong> ✓</td></tr>
+  <tr><td>Open her profile / add a progress note</td><td>loads by UUID; note saved + listed ✓</td></tr>
+  <tr><td>Sign out</td><td>401 again → back to <code>/login</code> ✓</td></tr>
+</table>
+
+<div class="try"><strong>Try it yourself.</strong> Start both: <code>npm run dev -w @clinical/api</code> and <code>npm run dev:web</code>. Open <a href="http://localhost:5173">localhost:5173</a> — you'll be bounced to the login page. Sign in with <code>l.brown@care.com</code> / <code>Password123!</code>. Add a resident… then <strong>hit refresh</strong>. They're still there. Open DevTools → Network and watch the actual <code>/api/residents</code> calls. That's the whole point of the last four phases.</div>
+
+<h3>⏭️ Next: Phases 5–8</h3>
+<p>Finish the migration (remaining tabs/pages → API, then delete <code>mockData.ts</code>), then harden: security polish (MFA, column encryption, read-audit), tests + CI, and deployment to an AU-region host.</p>
 
 <hr>
 <p class="meta">Pair this with <strong>01-security-and-scope.html</strong> for the requirements + security + DB-design view. Both are living documents — update them as the code evolves.</p>

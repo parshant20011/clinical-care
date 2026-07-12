@@ -12,8 +12,8 @@ import {
   X,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useUser } from "@/context/UserContext";
-import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_LABELS, type Role } from "@clinical/shared";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -33,7 +33,9 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose }: SidebarProps) {
-  const { name, role } = useUser();
+  const { user, logout } = useAuth();
+  const name = user?.name ?? "";
+  const role = user ? (ROLE_LABELS[user.role as Role] ?? user.role) : "";
   const initials = name.split(" ").map((n) => n[0]).join("");
   const showLabels = mobileOpen || !collapsed;
 
@@ -119,7 +121,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
               <button
                 type="button"
                 className="ml-auto text-sidebar-foreground/60 hover:text-sidebar-foreground shrink-0"
-                onClick={() => toast({ title: "Signed out" })}
+                onClick={() => void logout()}
               >
                 <LogOut className="h-4 w-4" />
               </button>

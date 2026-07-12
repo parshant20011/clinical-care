@@ -3,11 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { User, Heart, AlertTriangle, Calendar, CreditCard, Pencil } from "lucide-react";
-import type { Resident } from "@/data/mockData";
+import type { ResidentDetail } from "@clinical/shared";
 import { toast } from "@/hooks/use-toast";
 
 interface DetailsTabProps {
-  resident: Resident;
+  resident: ResidentDetail;
 }
 
 function Field({ label, value }: { label: string; value: string }) {
@@ -58,9 +58,8 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
             <div className="col-span-2">
               <Field label="Primary Diagnosis" value={resident.diagnosis} />
             </div>
-            <Field label="Doctor" value={resident.doctor} />
-            <Field label="Weight" value="62.5 kg" />
             <Field label="Care Level" value={resident.careLevel} />
+            <Field label="Admission Type" value={resident.admissionType} />
           </div>
         </div>
 
@@ -88,7 +87,10 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
             <p className="text-sm font-semibold">Admission Details</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Date of Admission" value={resident.doa} />
+            <Field
+              label="Date of Admission"
+              value={new Date(resident.dateOfAdmission).toLocaleDateString("en-AU")}
+            />
             <Field label="Status" value={resident.accountStatus} />
           </div>
         </div>
@@ -99,9 +101,9 @@ export default function DetailsTab({ resident }: DetailsTabProps) {
             <p className="text-sm font-semibold">Identification Numbers</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Field label="Medicare Number" value={resident.medicareCard} />
-            <Field label="IHI Number" value={resident.ihi} />
-            <Field label="Resident ID" value={`R${resident.id.padStart(3, "0")}`} />
+            <Field label="Medicare Number" value={resident.medicareCard ?? "—"} />
+            <Field label="IHI Number" value={resident.ihi ?? "—"} />
+            <Field label="Resident ID" value={resident.id} />
           </div>
         </div>
       </div>

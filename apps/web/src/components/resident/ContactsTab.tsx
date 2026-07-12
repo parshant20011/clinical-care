@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Phone, Mail, Star } from "lucide-react";
-import { residentContacts, type Resident } from "@/data/mockData";
+import { residentContacts } from "@/data/mockData";
+import type { ResidentDetail } from "@clinical/shared";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface ContactsTabProps {
-  resident: Resident;
+  resident: ResidentDetail;
 }
 
 export default function ContactsTab({ resident }: ContactsTabProps) {

@@ -13,8 +13,9 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, ArrowUpDown, Filter } from "lucide-react";
-import { residents as initialResidents, type Resident } from "@/data/mockData";
+import { Search, Plus, ArrowUpDown, Filter, Loader2 } from "lucide-react";
+import { useResidents, useCreateResident } from "@/services/residents";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 type SortKey = "name" | "age" | "room" | "careLevel";
@@ -25,7 +26,8 @@ const emptyForm = { name: "", room: "", age: "", gender: "Female", diagnosis: ""
 
 export default function Residents() {
   const navigate = useNavigate();
-  const [residents, setResidents] = useState<Resident[]>(initialResidents);
+  const { data: residents = [], isLoading, isError } = useResidents();
+  const createResident = useCreateResident();
   const [search, setSearch] = useState("");
   const [gender, setGender] = useState("all");
   const [careLevel, setCareLevel] = useState("all");
@@ -64,38 +66,31 @@ export default function Residents() {
 
   function handleAddResident() {
     if (!form.name || !form.room) return;
-    const newResident: Resident = {
-      id: `${Date.now()}`,
-      name: form.name,
-      room: form.room,
-      doa: new Date().toISOString().slice(0, 10),
-      age: Number(form.age) || 0,
-      gender: form.gender,
-      status: "Permanent",
-      respite: false,
-      onLeave: false,
-      acdp: false,
-      cpr: false,
-      bgl: false,
-      mobile: false,
-      ihi: "",
-      anAcc: "—",
-      task: 0,
-      alert: false,
-      doctor: "",
-      medicareCard: "",
-      concessionNumber: "",
-      nok: "",
-      residence: "",
-      urn: "",
-      diagnosis: form.diagnosis,
-      allergies: [],
-      careLevel: "Low",
-      accountStatus: "Active",
-    };
-    setResidents((prev) => [...prev, newResident]);
-    setForm(emptyForm);
-    setAddOpen(false);
+    createResident.mutate(
+      {
+        name: form.name,
+        room: form.room,
+        age: Number(form.age) || 0,
+        gender: form.gender,
+        diagnosis: form.diagnosis,
+        careLevel: "Medium",
+        status: "Permanent",
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Resident added", description: `${form.name} was created.` });
+          setForm(emptyForm);
+          setAddOpen(false);
+        },
+        onError: (err) => {
+          toast({
+            title: "Could not add resident",
+            description: err instanceof Error ? err.message : "Please try again.",
+            variant: "destructive",
+          });
+        },
+      },
+    );
   }
 
   return (
@@ -146,10 +141,23 @@ export default function Residents() {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        Showing {sorted.length} of {residents.length} residents
+        {isLoading ? "Loading residents…" : `Showing ${sorted.length} of ${residents.length} residents`}
       </p>
 
+      {isLoading && (
+        <div className="flex items-center justify-center py-16 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      )}
+
+      {isError && !isLoading && (
+        <div className="border border-red-200 bg-red-50 text-red-600 rounded-lg py-8 text-center text-sm">
+          Couldn't load residents. Is the API running?
+        </div>
+      )}
+
       {/* Mobile card list */}
+      {!isLoading && !isError && (
       <div className="md:hidden space-y-3">
         {sorted.map((r) => (
           <div
@@ -199,8 +207,10 @@ export default function Residents() {
           </div>
         )}
       </div>
+      )}
 
       {/* Desktop table */}
+      {!isLoading && !isError && (
       <div className="hidden md:block border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
@@ -236,7 +246,9 @@ export default function Residents() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{r.name}</p>
-                      <p className="text-xs text-muted-foreground">ID: R{r.id.padStart(3, "0")}</p>
+                      {r.preferredName && (
+                        <p className="text-xs text-muted-foreground">"{r.preferredName}"</p>
+                      )}
                     </div>
                   </div>
                 </TableCell>
@@ -278,6 +290,7 @@ export default function Residents() {
           </div>
         )}
       </div>
+      )}
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
@@ -316,7 +329,9 @@ export default function Residents() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddResident}>Add Resident</Button>
+            <Button onClick={handleAddResident} disabled={createResident.isPending}>
+              {createResident.isPending ? "Adding…" : "Add Resident"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

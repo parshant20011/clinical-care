@@ -6,12 +6,13 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Search, Phone, Mail, Building2, Star } from "lucide-react";
-import { residentDoctors, type ResidentDoctor, type Resident } from "@/data/mockData";
+import { residentDoctors, type ResidentDoctor } from "@/data/mockData";
+import type { ResidentDetail } from "@clinical/shared";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface DoctorsTabProps {
-  resident: Resident;
+  resident: ResidentDetail;
 }
 
 export default function DoctorsTab({ resident }: DoctorsTabProps) {
